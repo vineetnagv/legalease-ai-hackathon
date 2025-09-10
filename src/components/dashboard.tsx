@@ -1,4 +1,5 @@
 
+
 // @ts-nocheck
 'use client';
 
@@ -216,7 +217,7 @@ export default function Dashboard() {
         <div className="mx-auto max-w-4xl space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-              AI Legal Document Analysis
+              Legal Document Analysis
             </h1>
             <p className="text-lg text-muted-foreground">
               Upload your document and get instant insights.
