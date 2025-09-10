@@ -220,7 +220,7 @@ export default function Dashboard() {
               Legal Document Analysis
             </h1>
             <p className="text-lg text-muted-foreground">
-              Upload your document and get instant insights.
+              Upload your document and get AI-Powered insights.
             </p>
           </div>
 
