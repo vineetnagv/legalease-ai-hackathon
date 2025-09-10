@@ -4,6 +4,7 @@ import './globals.css';
 import { AuthProvider } from '@/lib/firebase/auth-context';
 import { Toaster } from '@/components/ui/toaster';
 import { ThemeProvider } from '@/components/theme-provider';
+import { FontProvider } from '@/contexts/font-size-context';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -30,10 +31,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            {children}
-            <Toaster />
-          </AuthProvider>
+          <FontProvider>
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
+          </FontProvider>
         </ThemeProvider>
       </body>
     </html>
