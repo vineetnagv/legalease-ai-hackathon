@@ -13,6 +13,8 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
   type User,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { auth } from './config';
 
@@ -21,6 +23,8 @@ interface AuthContextType {
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
+  signUpWithEmail: (email: string, pass: string) => Promise<any>;
+  signInWithEmail: (email: string, pass: string) => Promise<any>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,9 +48,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error('Error signing in with Google:', error);
-      // Optionally, handle the error in the UI
+      throw error;
     }
   };
+
+  const signUpWithEmail = async (email: string, pass: string) => {
+    try {
+      return await createUserWithEmailAndPassword(auth, email, pass);
+    } catch (error) {
+      console.error('Error signing up with email:', error);
+      throw error;
+    }
+  }
+
+  const signInWithEmail = async (email: string, pass: string) => {
+    try {
+      return await signInWithEmailAndPassword(auth, email, pass);
+    } catch (error) {
+      console.error('Error signing in with email:', error);
+      throw error;
+    }
+  }
 
   const signOut = async () => {
     try {
@@ -57,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, signUpWithEmail, signInWithEmail }}>
       {children}
     </AuthContext.Provider>
   );
