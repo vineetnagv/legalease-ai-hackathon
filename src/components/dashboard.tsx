@@ -1,3 +1,4 @@
+
 // @ts-nocheck
 'use client';
 
@@ -35,6 +36,7 @@ import { Logo } from '@/components/icons';
 import RiskMeter from './risk-meter';
 import KeyNumbers from './key-numbers';
 import ClauseBreakdown from './clause-breakdown';
+import { ThemeToggle } from './theme-toggle';
 
 type Status = 'idle' | 'suggesting_role' | 'processing' | 'success' | 'error';
 
@@ -178,43 +180,46 @@ export default function Dashboard() {
           <Logo className="h-7 w-7 text-primary" />
           <span className="text-xl font-bold">Legalease AI</span>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={user?.photoURL ?? ''} alt={user?.displayName ?? 'User'} />
-                <AvatarFallback>
-                  {user?.displayName?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <span className="hidden sm:inline">{user?.displayName}</span>
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-                <Link href="/settings">
-                    <Settings className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={signOut}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Logout</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={user?.photoURL ?? ''} alt={user?.displayName ?? 'User'} />
+                  <AvatarFallback>
+                    {user?.displayName?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="hidden sm:inline">{user?.displayName}</span>
+                <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Settings</span>
+                  </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Logout</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       <main className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="mx-auto max-w-4xl space-y-8">
-          <div className="space-y-4">
+          <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
               AI Legal Document Analysis
             </h1>
             <p className="text-lg text-muted-foreground">
-              Upload your document, confirm your role, and get instant insights.
+              Upload your document and get instant insights.
             </p>
           </div>
 

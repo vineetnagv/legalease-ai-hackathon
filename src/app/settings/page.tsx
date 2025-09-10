@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Moon, Sun, Laptop } from "lucide-react"
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme()
@@ -30,71 +28,6 @@ export default function SettingsPage() {
       <div className="grid gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>
-              Customize the look and feel of the application.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Label htmlFor="theme-group">Theme</Label>
-              </div>
-              <RadioGroup
-                id="theme-group"
-                defaultValue={theme}
-                onValueChange={(newTheme) => setTheme(newTheme)}
-                className="grid max-w-md grid-cols-3 gap-8 pt-2"
-              >
-                <div>
-                  <RadioGroupItem
-                    value="light"
-                    id="light"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="light"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <Sun className="mb-3 h-6 w-6" />
-                    Light
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem
-                    value="dark"
-                    id="dark"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="dark"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <Moon className="mb-3 h-6 w-6" />
-                    Dark
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem
-                    value="system"
-                    id="system"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="system"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                  >
-                    <Laptop className="mb-3 h-6 w-6" />
-                    System
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
             <CardTitle>Accessibility</CardTitle>
             <CardDescription>
               Settings to improve your experience.
@@ -108,7 +41,7 @@ export default function SettingsPage() {
                   Improve visibility and text readability.
                 </span>
               </Label>
-              <Switch id="high-contrast" disabled />
+              <Switch id="high-contrast" />
             </div>
              <div className="flex items-center justify-between space-x-2">
               <Label htmlFor="font-size" className="flex flex-col space-y-1">
@@ -117,7 +50,7 @@ export default function SettingsPage() {
                   Adjust the font size for better readability.
                 </span>
               </Label>
-              <Button variant="outline" disabled>Default</Button>
+              <Button variant="outline">Default</Button>
             </div>
           </CardContent>
         </Card>

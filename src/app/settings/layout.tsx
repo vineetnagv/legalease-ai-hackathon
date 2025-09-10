@@ -1,4 +1,5 @@
 import { Logo } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/firebase/auth-context";
 import { ChevronLeft } from "lucide-react";
@@ -17,12 +18,15 @@ export default function SettingsLayout({
           <Logo className="h-7 w-7 text-primary" />
           <span className="text-xl font-bold">Legalease AI</span>
         </div>
-        <Button asChild variant="outline">
-            <Link href="/">
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                Back to App
-            </Link>
-        </Button>
+        <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button asChild variant="outline">
+                <Link href="/">
+                    <ChevronLeft className="mr-2 h-4 w-4" />
+                    Back to App
+                </Link>
+            </Button>
+        </div>
       </header>
       <main className="flex-1">
         <div className="mx-auto max-w-4xl">
