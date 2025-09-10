@@ -7,13 +7,14 @@ import {
 } from '@/components/ui/card';
 import { Badge } from './ui/badge';
 import { AlertTriangle } from 'lucide-react';
+import type { AnalysisResult } from '@/lib/types';
 
 interface KeyNumbersProps {
-  keyNumbers: Record<string, string>;
+  keyNumbers: AnalysisResult['keyNumbers'];
 }
 
 export default function KeyNumbers({ keyNumbers }: KeyNumbersProps) {
-  const hasNumbers = Object.keys(keyNumbers).length > 0;
+  const hasNumbers = keyNumbers && keyNumbers.length > 0;
 
   return (
     <Card>
@@ -27,7 +28,7 @@ export default function KeyNumbers({ keyNumbers }: KeyNumbersProps) {
       <CardContent>
         {hasNumbers ? (
           <div className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
-            {Object.entries(keyNumbers).map(([key, value]) => (
+            {keyNumbers.map(({ key, value }) => (
               <div
                 key={key}
                 className="flex flex-col justify-between rounded-lg border p-3"

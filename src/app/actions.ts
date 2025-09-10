@@ -71,7 +71,7 @@ export async function analyzeDocument(
 
   try {
     // Run all AI analysis flows in parallel for efficiency.
-    const [risk, keyNumbers, explainedClauses] = await Promise.all([
+    const [risk, keyNumbersResult, explainedClauses] = await Promise.all([
       assessDocumentRisk({ documentText, userRole }),
       extractKeyNumbers({ documentText }),
       explainClauses({ clauses, userRole }),
@@ -85,7 +85,7 @@ export async function analyzeDocument(
 
     return {
       riskAssessment: risk,
-      keyNumbers: keyNumbers.keyNumbers,
+      keyNumbers: keyNumbersResult.keyNumbers,
       clauseBreakdown: explainedClauses,
     };
   } catch (error: any) {
