@@ -1,17 +1,14 @@
-// @ts-nocheck
+
 'use server';
 
 import {
   assessDocumentRisk,
-  type AssessDocumentRiskOutput,
 } from '@/ai/flows/assess-document-risk';
 import {
   extractKeyNumbers,
-  type ExtractKeyNumbersOutput,
 } from '@/ai/flows/extract-key-numbers';
 import {
   explainClauses,
-  type ExplainClausesOutput,
 } from '@/ai/flows/explain-clauses';
 import { suggestUserRole } from '@/ai/flows/suggest-user-role';
 import type { AnalysisResult } from '@/lib/types';
@@ -91,11 +88,17 @@ export async function analyzeDocument(
       keyNumbers: keyNumbers.keyNumbers,
       clauseBreakdown: explainedClauses,
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error during AI analysis:', error);
+    
+    // Check for specific flow failures if possible, otherwise throw a generic message.
+    let friendlyMessage = 'An unexpected error occurred during the AI analysis. Please try again later.';
+    if (error.message) {
+      // You could add more checks here for specific error types from the AI flows.
+      friendlyMessage = `An error occurred during analysis: ${error.message}`;
+    }
+
     // Provide a more user-friendly error message.
-    throw new Error(
-      'An unexpected error occurred during the AI analysis. Please try again later.'
-    );
+    throw new Error(friendlyMessage);
   }
 }
