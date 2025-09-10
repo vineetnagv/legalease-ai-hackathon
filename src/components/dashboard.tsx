@@ -1,6 +1,4 @@
 
-
-// @ts-nocheck
 'use client';
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
@@ -37,6 +35,7 @@ import { Logo } from '@/components/icons';
 import RiskMeter from './risk-meter';
 import KeyNumbers from './key-numbers';
 import ClauseBreakdown from './clause-breakdown';
+import FaqSection from './faq-section';
 import { ThemeToggle } from './theme-toggle';
 
 type Status = 'idle' | 'suggesting_role' | 'processing' | 'success' | 'error';
@@ -144,6 +143,7 @@ export default function Dashboard() {
     }, 2500);
 
     try {
+      if (!file) throw new Error("File is not selected.");
       const fileText = await file.text();
       const result = await analyzeDocument(fileText, userRole);
       setAnalysisResult(result);
@@ -340,6 +340,7 @@ export default function Dashboard() {
               />
               <KeyNumbers keyNumbers={analysisResult.keyNumbers} />
               <ClauseBreakdown clauses={analysisResult.clauseBreakdown} />
+              <FaqSection faqData={analysisResult.faq} />
             </div>
           )}
         </div>

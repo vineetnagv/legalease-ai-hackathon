@@ -12,6 +12,7 @@ import {
 } from '@/ai/flows/explain-clauses';
 import { suggestUserRole } from '@/ai/flows/suggest-user-role';
 import type { AnalysisResult } from '@/lib/types';
+import { generateFaq } from '@/ai/flows/generate-faq';
 
 /**
  * Splits a document's text into an array of clauses.
@@ -71,10 +72,11 @@ export async function analyzeDocument(
 
   try {
     // Run all AI analysis flows in parallel for efficiency.
-    const [risk, keyNumbersResult, explainedClauses] = await Promise.all([
+    const [risk, keyNumbersResult, explainedClauses, faqResult] = await Promise.all([
       assessDocumentRisk({ documentText, userRole }),
       extractKeyNumbers({ documentText }),
       explainClauses({ clauses, userRole }),
+      generateFaq({ documentText, userRole }),
     ]);
 
     // This check is necessary because the `explainClauses` flow can sometimes return
@@ -87,6 +89,7 @@ export async function analyzeDocument(
       riskAssessment: risk,
       keyNumbers: keyNumbersResult.keyNumbers,
       clauseBreakdown: explainedClauses,
+      faq: faqResult,
     };
   } catch (error: any) {
     console.error('Error during AI analysis:', error);
