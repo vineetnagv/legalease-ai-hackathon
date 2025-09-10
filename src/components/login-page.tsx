@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '@/lib/firebase/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +10,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Separator } from './ui/separator';
+import { Progress } from './ui/progress';
+import { CheckCircle, XCircle } from 'lucide-react';
+
+const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
+    <div className={`flex items-center text-sm ${met ? 'text-green-600' : 'text-muted-foreground'}`}>
+        {met ? <CheckCircle className="mr-2 h-4 w-4" /> : <XCircle className="mr-2 h-4 w-4" />}
+        {text}
+    </div>
+);
 
 export default function LoginPage() {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
@@ -18,6 +27,28 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const passwordValidation = useMemo(() => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const isLongEnough = password.length >= 8;
+
+    const strength = [hasUpperCase, hasLowerCase, hasNumber, hasSpecialChar, isLongEnough].filter(Boolean).length;
+    const progress = (strength / 5) * 100;
+
+    return {
+      hasUpperCase,
+      hasLowerCase,
+      hasNumber,
+      hasSpecialChar,
+      isLongEnough,
+      isValid: strength === 5,
+      progress,
+    };
+  }, [password]);
+
 
   const handleAuthAction = async (action: 'signIn' | 'signUp') => {
     setLoading(true);
@@ -25,6 +56,15 @@ export default function LoginPage() {
       if (action === 'signIn') {
         await signInWithEmail(email, password);
       } else {
+        if (!passwordValidation.isValid) {
+            toast({
+                variant: 'destructive',
+                title: 'Weak Password',
+                description: 'Please ensure your password meets all the requirements.',
+            });
+            setLoading(false);
+            return;
+        }
         await signUpWithEmail(email, password);
         toast({
           title: 'Account Created',
@@ -74,12 +114,12 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin">
+          <Tabs defaultValue="signin" onValueChange={() => { setEmail(''); setPassword(''); }}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
-            <TabsContent value="signin" className="space-y-4">
+            <TabsContent value="signin" className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label htmlFor="email-signin">Email</Label>
                 <Input id="email-signin" type="email" placeholder="m@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
@@ -92,7 +132,7 @@ export default function LoginPage() {
                 {loading ? 'Signing In...' : 'Sign In'}
               </Button>
             </TabsContent>
-            <TabsContent value="signup" className="space-y-4">
+            <TabsContent value="signup" className="space-y-4 pt-4">
               <div className="space-y-2">
                 <Label htmlFor="email-signup">Email</Label>
                 <Input id="email-signup" type="email" placeholder="m@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={loading}/>
@@ -101,7 +141,19 @@ export default function LoginPage() {
                 <Label htmlFor="password-signup">Password</Label>
                 <Input id="password-signup" type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={loading}/>
               </div>
-              <Button onClick={() => handleAuthAction('signUp')} className="w-full" disabled={loading}>
+               {password.length > 0 && (
+                <div className="space-y-2">
+                    <Progress value={passwordValidation.progress} className="h-2" />
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 pt-1'>
+                        <PasswordRequirement met={passwordValidation.isLongEnough} text="At least 8 characters" />
+                        <PasswordRequirement met={passwordValidation.hasUpperCase} text="One uppercase letter" />
+                        <PasswordRequirement met={passwordValidation.hasLowerCase} text="One lowercase letter" />
+                        <PasswordRequirement met={passwordValidation.hasNumber} text="One number" />
+                        <PasswordRequirement met={passwordValidation.hasSpecialChar} text="One special character" />
+                    </div>
+                </div>
+              )}
+              <Button onClick={() => handleAuthAction('signUp')} className="w-full" disabled={loading || !passwordValidation.isValid}>
                 {loading ? 'Creating Account...' : 'Create Account'}
               </Button>
             </TabsContent>
