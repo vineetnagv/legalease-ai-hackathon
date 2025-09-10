@@ -1,7 +1,7 @@
 // @ts-nocheck
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useAuth } from '@/lib/firebase/auth-context';
 import {
   AlertCircle,
@@ -12,7 +12,7 @@ import {
   UploadCloud,
 } from 'lucide-react';
 import type { AnalysisResult } from '@/lib/types';
-import { analyzeDocument } from '@/app/actions';
+import { analyzeDocument, suggestRole } from '@/app/actions';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -22,13 +22,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -37,16 +33,7 @@ import RiskMeter from './risk-meter';
 import KeyNumbers from './key-numbers';
 import ClauseBreakdown from './clause-breakdown';
 
-type Status = 'idle' | 'processing' | 'success' | 'error';
-
-const ROLES = [
-  'Tenant',
-  'Landlord',
-  'Employee',
-  'Employer',
-  'Freelancer',
-  'Client',
-];
+type Status = 'idle' | 'suggesting_role' | 'processing' | 'success' | 'error';
 
 const LOADING_MESSAGES = [
   'Uploading document...',
@@ -61,7 +48,6 @@ export default function Dashboard() {
 
   const [status, setStatus] = useState<Status>('idle');
   const [file, setFile] = useState<File | null>(null);
-  const [role, setRole] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
     null
@@ -69,13 +55,42 @@ export default function Dashboard() {
   const [error, setError] = useState<string>('');
   const [loadingStep, setLoadingStep] = useState(0);
 
-  const canAnalyze = useMemo(() => file && role, [file, role]);
+  const [suggestedRole, setSuggestedRole] = useState('');
+  const [selectedRoleOption, setSelectedRoleOption] = useState('');
+  const [customRole, setCustomRole] = useState('');
 
-  const handleFileChange = (selectedFile: File | null) => {
+  const userRole = useMemo(() => {
+    return selectedRoleOption === 'other' ? customRole : selectedRoleOption;
+  }, [selectedRoleOption, customRole]);
+
+  const canAnalyze = useMemo(() => file && userRole, [file, userRole]);
+
+  const handleFileChange = useCallback(async (selectedFile: File | null) => {
     if (selectedFile) {
       if (selectedFile.type === 'application/pdf' || selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.type.startsWith('text/')) {
         setFile(selectedFile);
-        setStatus('idle');
+        setStatus('suggesting_role');
+        setSuggestedRole('');
+        setSelectedRoleOption('');
+        setCustomRole('');
+        try {
+          const fileText = await selectedFile.text();
+          const role = await suggestRole(fileText);
+          setSuggestedRole(role);
+          setSelectedRoleOption(role);
+        } catch (e) {
+            const errorMessage = e instanceof Error ? e.message : 'Could not suggest a role.';
+            toast({
+              variant: 'destructive',
+              title: 'Role Suggestion Failed',
+              description: errorMessage,
+            });
+            // Fallback to allow user to enter role manually
+            setSuggestedRole('Analyst'); 
+            setSelectedRoleOption('other');
+        } finally {
+            setStatus('idle');
+        }
       } else {
         toast({
           variant: 'destructive',
@@ -84,7 +99,8 @@ export default function Dashboard() {
         });
       }
     }
-  };
+  }, [toast]);
+
 
   const handleDragEvents = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -123,7 +139,7 @@ export default function Dashboard() {
 
     try {
       const fileText = await file.text();
-      const result = await analyzeDocument(fileText, role);
+      const result = await analyzeDocument(fileText, userRole);
       setAnalysisResult(result);
       setStatus('success');
     } catch (e: unknown) {
@@ -143,10 +159,14 @@ export default function Dashboard() {
   const handleReset = () => {
     setStatus('idle');
     setFile(null);
-    setRole('');
     setAnalysisResult(null);
     setError('');
+    setSuggestedRole('');
+    setSelectedRoleOption('');
+    setCustomRole('');
   };
+
+  const isRoleSelectionDisabled = status === 'processing' || status === 'suggesting_role';
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -184,31 +204,13 @@ export default function Dashboard() {
               AI Legal Document Analysis
             </h1>
             <p className="text-lg text-muted-foreground">
-              Upload your document, tell us your role, and get instant insights.
+              Upload your document, confirm your role, and get instant insights.
             </p>
           </div>
 
           {status !== 'success' && (
             <Card>
               <CardContent className="space-y-6 p-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">I am the:</label>
-                    <Select value={role} onValueChange={setRole} disabled={status === 'processing'}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select your role..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ROLES.map((r) => (
-                          <SelectItem key={r} value={r}>
-                            {r}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
                 <div
                   className={`relative flex min-h-[200px] w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
                     isDragging ? 'border-primary bg-accent' : ''
@@ -225,18 +227,20 @@ export default function Dashboard() {
                     className="hidden"
                     onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
                     accept=".pdf,.docx,.txt"
-                    disabled={status === 'processing'}
+                    disabled={isRoleSelectionDisabled}
                   />
-                  {status === 'processing' ? (
+                  {isRoleSelectionDisabled ? (
                     <div className="text-center">
                       <LoaderCircle className="mx-auto h-12 w-12 animate-spin text-primary" />
-                      <p className="mt-4 text-lg font-medium">{LOADING_MESSAGES[loadingStep]}</p>
+                      <p className="mt-4 text-lg font-medium">
+                        {status === 'processing' ? LOADING_MESSAGES[loadingStep] : 'Suggesting your role...'}
+                      </p>
                     </div>
                   ) : file ? (
                     <div className="text-center text-primary">
                       <FileText className="mx-auto h-12 w-12" />
                       <p className="mt-2 font-semibold">{file.name}</p>
-                      <Button variant="link" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); }}>
+                      <Button variant="link" size="sm" onClick={(e) => { e.stopPropagation(); handleReset(); }}>
                         Remove file
                       </Button>
                     </div>
@@ -251,10 +255,36 @@ export default function Dashboard() {
                     </div>
                   )}
                 </div>
+                
+                {file && !isRoleSelectionDisabled && (
+                    <div className="space-y-4">
+                        <label className="text-sm font-medium">Confirm your role in this agreement:</label>
+                        <RadioGroup value={selectedRoleOption} onValueChange={setSelectedRoleOption} disabled={isRoleSelectionDisabled}>
+                            {suggestedRole && suggestedRole !== 'Other' && (
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value={suggestedRole} id={`role-${suggestedRole}`} />
+                                    <Label htmlFor={`role-${suggestedRole}`}>{suggestedRole} (AI Suggestion)</Label>
+                                </div>
+                            )}
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="other" id="role-other" />
+                                <Label htmlFor="role-other">Other</Label>
+                            </div>
+                        </RadioGroup>
+                        {selectedRoleOption === 'other' && (
+                            <Input 
+                                placeholder="Please specify your role"
+                                value={customRole}
+                                onChange={(e) => setCustomRole(e.target.value)}
+                                disabled={isRoleSelectionDisabled}
+                            />
+                        )}
+                    </div>
+                )}
 
                 <Button
                   onClick={handleAnalysis}
-                  disabled={!canAnalyze || status === 'processing'}
+                  disabled={!canAnalyze || isRoleSelectionDisabled}
                   className="w-full"
                   size="lg"
                 >
@@ -281,7 +311,7 @@ export default function Dashboard() {
                    <FileText className="h-8 w-8 text-primary" />
                    <div>
                      <p className="font-bold">{file?.name}</p>
-                     <p className="text-sm text-muted-foreground">Role: {role}</p>
+                     <p className="text-sm text-muted-foreground">Role: {userRole}</p>
                    </div>
                 </div>
                 <Button onClick={handleReset} variant="outline">Analyze New Document</Button>

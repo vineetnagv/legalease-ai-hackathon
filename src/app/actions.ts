@@ -13,6 +13,7 @@ import {
   explainClauses,
   type ExplainClausesOutput,
 } from '@/ai/flows/explain-clauses';
+import { suggestUserRole } from '@/ai/flows/suggest-user-role';
 import type { AnalysisResult } from '@/lib/types';
 
 /**
@@ -27,6 +28,25 @@ function splitIntoClauses(text: string): string[] {
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter((p) => p.length > 20); // Filter out short paragraphs
+}
+
+/**
+ * Calls the AI flow to suggest a user role based on the document text.
+ * @param documentText The text content of the legal document.
+ * @returns A promise that resolves to the suggested role string.
+ */
+export async function suggestRole(documentText: string): Promise<string> {
+  if (!documentText) {
+    throw new Error('Document text is required to suggest a role.');
+  }
+  try {
+    const { suggestedRole } = await suggestUserRole({ documentText });
+    return suggestedRole;
+  } catch (error) {
+    console.error('Error suggesting user role:', error);
+    // Return a sensible default in case of an error
+    return 'User';
+  }
 }
 
 /**
