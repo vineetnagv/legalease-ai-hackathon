@@ -1,0 +1,163 @@
+'use client';
+
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Send, CornerDownLeft, User, Bot, LoaderCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from './ui/scroll-area';
+import { getChatResponse } from '@/app/actions';
+import { useLanguage } from '@/contexts/language-context';
+import type { LanguageCode } from '@/lib/types';
+import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+
+interface ChatMessage {
+  role: 'user' | 'model';
+  content: string;
+}
+
+interface ChatInterfaceProps {
+  documentText: string;
+  userRole: string;
+}
+
+export default function ChatInterface({ documentText, userRole }: ChatInterfaceProps) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { language } = useLanguage();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const handleSendMessage = useCallback(async (messageContent: string) => {
+    if (!messageContent.trim() || isLoading) return;
+
+    const newMessages: ChatMessage[] = [...messages, { role: 'user', content: messageContent }];
+    setMessages(newMessages);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const response = await getChatResponse({
+        documentText,
+        userRole,
+        question: messageContent,
+        history: newMessages.slice(0, -1), // Send history without the current user message
+        languageCode: language as LanguageCode,
+      });
+
+      setMessages(prev => [...prev, { role: 'model', content: response }]);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
+      setMessages(prev => [...prev, { role: 'model', content: `Error: ${errorMessage}` }]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [documentText, userRole, language, messages, isLoading]);
+  
+  useEffect(() => {
+    // Scroll to the bottom whenever messages change
+    if (scrollAreaRef.current) {
+        const viewport = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (viewport) {
+            viewport.scrollTop = viewport.scrollHeight;
+        }
+    }
+  }, [messages]);
+
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage(input);
+    }
+  };
+  
+  const ChatBubble = ({ message }: { message: ChatMessage }) => {
+    const isUser = message.role === 'user';
+    return (
+      <div className={cn("flex items-start gap-3", isUser ? "justify-end" : "justify-start")}>
+        {!isUser && (
+          <Avatar className="h-8 w-8 border">
+            <AvatarFallback><Bot size={20} /></AvatarFallback>
+          </Avatar>
+        )}
+        <div
+          className={cn(
+            "max-w-md rounded-lg p-3",
+            isUser ? "bg-primary text-primary-foreground" : "bg-muted"
+          )}
+        >
+          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        </div>
+        {isUser && (
+            <Avatar className="h-8 w-8 border">
+                <AvatarFallback><User size={20} /></AvatarFallback>
+            </Avatar>
+        )}
+      </div>
+    );
+  };
+
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-2xl">Ask the AI</CardTitle>
+        <CardDescription>
+            Have a conversation with the AI to ask specific questions about your document.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col h-[60vh]">
+        <ScrollArea className="flex-1 pr-4 -mr-4" ref={scrollAreaRef}>
+          <div className="space-y-4 p-4">
+            {messages.length === 0 && (
+                <div className="text-center text-muted-foreground p-8">
+                    <p>No messages yet. Start the conversation!</p>
+                </div>
+            )}
+            {messages.map((message, index) => (
+              <ChatBubble key={index} message={message} />
+            ))}
+            {isLoading && (
+              <div className="flex items-start gap-3 justify-start">
+                 <Avatar className="h-8 w-8 border">
+                    <AvatarFallback><Bot size={20} /></AvatarFallback>
+                </Avatar>
+                <div className="bg-muted rounded-lg p-3 flex items-center">
+                    <LoaderCircle className="h-5 w-5 animate-spin text-primary" />
+                    <span className="ml-2 text-sm text-muted-foreground">AI is thinking...</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+        <div className="relative mt-4">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type your question here..."
+            className="pr-20 min-h-[60px]"
+            disabled={isLoading}
+            rows={1}
+          />
+          <div className="absolute bottom-3 right-3 flex items-center gap-2">
+            <p className="text-xs text-muted-foreground hidden sm:block">
+                Shift + <CornerDownLeft size={12} className="inline-block" /> for new line
+            </p>
+            <Button
+              type="submit"
+              size="icon"
+              onClick={() => handleSendMessage(input)}
+              disabled={isLoading || !input.trim()}
+            >
+              <Send className="h-4 w-4" />
+              <span className="sr-only">Send</span>
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}

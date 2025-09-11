@@ -24,3 +24,8 @@ export const supportedLanguages = {
 } as const;
 
 export type LanguageCode = keyof typeof supportedLanguages;
+
+export interface ChatMessage {
+    role: 'user' | 'model';
+    content: string;
+}

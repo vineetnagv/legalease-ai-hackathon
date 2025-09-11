@@ -14,6 +14,7 @@ import { suggestUserRole } from '@/ai/flows/suggest-user-role';
 import type { AnalysisResult } from '@/lib/types';
 import { generateFaq } from '@/ai/flows/generate-faq';
 import { supportedLanguages } from '@/lib/types';
+import { chatAboutDocument, type ChatAboutDocumentInput } from '@/ai/flows/conversational-chat';
 
 /**
  * Splits a document's text into an array of clauses.
@@ -107,6 +108,36 @@ export async function analyzeDocument(
     }
 
     // Provide a more user-friendly error message.
+    throw new Error(friendlyMessage);
+  }
+}
+
+/**
+ * Handles a single turn in the conversational chat about the document.
+ * @param input The input for the chat flow, including document, history, and question.
+ * @returns A promise that resolves to the AI's answer.
+ */
+export async function getChatResponse(
+  input: Omit<ChatAboutDocumentInput, 'language'> & { languageCode: keyof typeof supportedLanguages }
+): Promise<string> {
+  if (!input.documentText || !input.question) {
+    throw new Error('Document text and a question are required.');
+  }
+
+  const language = supportedLanguages[input.languageCode];
+
+  try {
+    const { answer } = await chatAboutDocument({
+      ...input,
+      language,
+    });
+    return answer;
+  } catch (error: any) {
+    console.error('Error getting chat response:', error);
+    let friendlyMessage = 'Sorry, I encountered an error while trying to answer. Please try again.';
+    if (error.message) {
+       friendlyMessage = `An error occurred: ${error.message}`;
+    }
     throw new Error(friendlyMessage);
   }
 }

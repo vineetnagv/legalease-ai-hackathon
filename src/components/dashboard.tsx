@@ -40,6 +40,7 @@ import { ThemeToggle } from './theme-toggle';
 import { useLanguage } from '@/contexts/language-context';
 import { LanguageSelector } from './language-selector';
 import { useTranslation } from '@/lib/translations';
+import ChatInterface from './chat-interface';
 
 type Status = 'idle' | 'suggesting_role' | 'processing' | 'success' | 'error';
 
@@ -51,6 +52,7 @@ export default function Dashboard() {
 
   const [status, setStatus] = useState<Status>('idle');
   const [file, setFile] = useState<File | null>(null);
+  const [documentText, setDocumentText] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
     null
@@ -86,6 +88,7 @@ export default function Dashboard() {
         setCustomRole('');
         try {
           const fileText = await selectedFile.text();
+          setDocumentText(fileText); // Save document text
           const role = await suggestRole(fileText);
           setSuggestedRole(role);
           setSelectedRoleOption(role);
@@ -149,9 +152,8 @@ export default function Dashboard() {
     }, 2500);
 
     try {
-      if (!file) throw new Error("File is not selected.");
-      const fileText = await file.text();
-      const result = await analyzeDocument(fileText, userRole, language);
+      if (!documentText) throw new Error("File content is not available.");
+      const result = await analyzeDocument(documentText, userRole, language);
       setAnalysisResult(result);
       setStatus('success');
     } catch (e: unknown) {
@@ -171,6 +173,7 @@ export default function Dashboard() {
   const handleReset = () => {
     setStatus('idle');
     setFile(null);
+    setDocumentText('');
     setAnalysisResult(null);
     setError('');
     setSuggestedRole('');
@@ -348,6 +351,7 @@ export default function Dashboard() {
               <KeyNumbers keyNumbers={analysisResult.keyNumbers} />
               <ClauseBreakdown clauses={analysisResult.clauseBreakdown} />
               <FaqSection faqData={analysisResult.faq} />
+              <ChatInterface documentText={documentText} userRole={userRole} />
             </div>
           )}
         </div>
