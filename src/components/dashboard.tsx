@@ -60,7 +60,7 @@ export default function Dashboard() {
     null
   );
   const [error, setError] = useState<string>('');
-  const [loadingStep, setLoadingStep] = useState(0);
+  const [currentStepMessage, setCurrentStepMessage] = useState<string>('');
 
   const [suggestedRole, setSuggestedRole] = useState('');
   const [selectedRoleOption, setSelectedRoleOption] = useState('');
@@ -71,10 +71,12 @@ export default function Dashboard() {
   }, [selectedRoleOption, customRole]);
   
   const LOADING_MESSAGES = useMemo(() => [
-    t('uploading_document'),
-    t('extracting_text'),
-    t('analyzing_with_ai'),
-    t('compiling_report'),
+      t('analyzing_risk'),
+      t('extracting_key_numbers'),
+      t('breaking_down_clauses'),
+      t('generating_faqs'),
+      t('checking_for_missing_clauses'),
+      t('compiling_report'),
   ], [t]);
 
 
@@ -91,6 +93,7 @@ export default function Dashboard() {
         try {
           const fileText = await selectedFile.text();
           setDocumentText(fileText); // Save document text
+          setCurrentStepMessage(t('suggesting_role'));
           const role = await suggestRole(fileText);
           setSuggestedRole(role);
           setSelectedRoleOption(role);
@@ -106,6 +109,7 @@ export default function Dashboard() {
             setSelectedRoleOption('other');
         } finally {
             setStatus('idle');
+            setCurrentStepMessage('');
         }
       } else {
         toast({
@@ -141,21 +145,31 @@ export default function Dashboard() {
     }
   };
 
+  const runAnalysisWithProgress = async () => {
+    if (!documentText) throw new Error("File content is not available.");
+
+    for (const message of LOADING_MESSAGES) {
+      setCurrentStepMessage(message);
+      // This short delay allows React to re-render with the new message
+      // before the main thread is blocked by the next (potential) step.
+      await new Promise(resolve => setTimeout(resolve, 50)); 
+    }
+    
+    // The final step is the actual long-running analysis call
+    const result = await analyzeDocument(documentText, userRole, language as LanguageCode);
+    return result;
+  }
+
   const handleAnalysis = async () => {
     if (!canAnalyze) return;
 
     setStatus('processing');
     setError('');
     setAnalysisResult(null);
-    setLoadingStep(0);
-
-    const loadingInterval = setInterval(() => {
-        setLoadingStep(prev => (prev + 1) % LOADING_MESSAGES.length);
-    }, 2500);
 
     try {
-      if (!documentText) throw new Error("File content is not available.");
-      const result = await analyzeDocument(documentText, userRole, language as LanguageCode);
+      // Use the new wrapper function to show progress
+      const result = await runAnalysisWithProgress();
       setAnalysisResult(result);
       setStatus('success');
     } catch (e: unknown) {
@@ -168,7 +182,7 @@ export default function Dashboard() {
         description: errorMessage,
       });
     } finally {
-      clearInterval(loadingInterval);
+      setCurrentStepMessage('');
     }
   };
 
@@ -181,9 +195,10 @@ export default function Dashboard() {
     setSuggestedRole('');
     setSelectedRoleOption('');
     setCustomRole('');
+    setCurrentStepMessage('');
   };
 
-  const isRoleSelectionDisabled = status === 'processing' || status === 'suggesting_role';
+  const isProcessing = status === 'processing' || status === 'suggesting_role';
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -255,13 +270,13 @@ export default function Dashboard() {
                     className="hidden"
                     onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
                     accept=".pdf,.docx,.txt"
-                    disabled={isRoleSelectionDisabled}
+                    disabled={isProcessing}
                   />
-                  {isRoleSelectionDisabled ? (
+                  {isProcessing ? (
                     <div className="text-center">
                       <LoaderCircle className="mx-auto h-12 w-12 animate-spin text-primary" />
                       <p className="mt-4 text-lg font-medium">
-                        {status === 'processing' ? LOADING_MESSAGES[loadingStep] : t('suggesting_role')}
+                        {currentStepMessage}
                       </p>
                     </div>
                   ) : file ? (
@@ -284,10 +299,10 @@ export default function Dashboard() {
                   )}
                 </div>
                 
-                {file && !isRoleSelectionDisabled && (
+                {file && !isProcessing && (
                     <div className="space-y-4">
                         <label className="text-sm font-medium">{t('confirm_your_role')}</label>
-                        <RadioGroup value={selectedRoleOption} onValueChange={setSelectedRoleOption} disabled={isRoleSelectionDisabled}>
+                        <RadioGroup value={selectedRoleOption} onValueChange={setSelectedRoleOption} disabled={isProcessing}>
                             {suggestedRole && suggestedRole !== 'Other' && (
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value={suggestedRole} id={`role-${suggestedRole}`} />
@@ -304,7 +319,7 @@ export default function Dashboard() {
                                 placeholder={t('specify_your_role')}
                                 value={customRole}
                                 onChange={(e) => setCustomRole(e.target.value)}
-                                disabled={isRoleSelectionDisabled}
+                                disabled={isProcessing}
                             />
                         )}
                     </div>
@@ -312,7 +327,7 @@ export default function Dashboard() {
 
                 <Button
                   onClick={handleAnalysis}
-                  disabled={!canAnalyze || isRoleSelectionDisabled}
+                  disabled={!canAnalyze || isProcessing}
                   className="w-full"
                   size="lg"
                 >
@@ -369,3 +384,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
+    
