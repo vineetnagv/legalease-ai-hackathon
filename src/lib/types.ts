@@ -17,6 +17,10 @@ export const supportedLanguages = {
   kn: 'ಕನ್ನಡ (Kannada)',
   bn: 'বাংলা (Bengali)',
   mr: 'मराठी (Marathi)',
+  gu: 'ગુજરાતી (Gujarati)',
+  ml: 'മലയാളം (Malayalam)',
+  te: 'తెలుగు (Telugu)',
+  ur: 'اردو (Urdu)',
 } as const;
 
 export type LanguageCode = keyof typeof supportedLanguages;
