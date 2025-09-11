@@ -64,22 +64,22 @@ export default function LoginPage() {
         if (!passwordValidation.isValid) {
             toast({
                 variant: 'destructive',
-                title: 'Weak Password',
-                description: 'Please ensure your password meets all the requirements.',
+                title: t('weak_password_title'),
+                description: t('weak_password_description'),
             });
             setLoading(false);
             return;
         }
         await signUpWithEmail(email, password);
         toast({
-          title: 'Account Created',
-          description: "You've successfully signed up! You are now logged in.",
+          title: t('account_created_title'),
+          description: t('account_created_description'),
         });
       }
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Authentication Error',
+        title: t('auth_error'),
         description: error.message,
       });
     } finally {
@@ -94,7 +94,7 @@ export default function LoginPage() {
     } catch (error: any) {
        toast({
         variant: 'destructive',
-        title: 'Authentication Error',
+        title: t('auth_error'),
         description: error.message,
       });
     } finally {

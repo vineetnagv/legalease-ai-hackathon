@@ -98,7 +98,7 @@ export default function Dashboard() {
             const errorMessage = e instanceof Error ? e.message : 'Could not suggest a role.';
             toast({
               variant: 'destructive',
-              title: 'Role Suggestion Failed',
+              title: t('role_suggestion_failed'),
               description: errorMessage,
             });
             // Fallback to allow user to enter role manually
@@ -110,12 +110,12 @@ export default function Dashboard() {
       } else {
         toast({
           variant: 'destructive',
-          title: 'Unsupported File Type',
-          description: 'Please upload a PDF, DOCX, or a plain text file.',
+          title: t('unsupported_file_type_title'),
+          description: t('unsupported_file_type_description'),
         });
       }
     }
-  }, [toast]);
+  }, [toast, t]);
 
 
   const handleDragEvents = (e: React.DragEvent<HTMLDivElement>) => {
@@ -155,7 +155,7 @@ export default function Dashboard() {
 
     try {
       if (!documentText) throw new Error("File content is not available.");
-      const result = await analyzeDocument(documentText, userRole, language);
+      const result = await analyzeDocument(documentText, userRole, language as LanguageCode);
       setAnalysisResult(result);
       setStatus('success');
     } catch (e: unknown) {
@@ -346,7 +346,7 @@ export default function Dashboard() {
                   <ChatInterface documentText={documentText} userRole={userRole}>
                     <Button variant="outline">
                       <MessageSquarePlus className="mr-2 h-4 w-4" />
-                      Ask the AI
+                      {t('ask_the_ai')}
                     </Button>
                   </ChatInterface>
                   <Button onClick={handleReset} variant="default">{t('analyze_new_document')}</Button>

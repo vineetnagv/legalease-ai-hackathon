@@ -16,9 +16,9 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
   SheetFooter,
 } from '@/components/ui/sheet';
+import { useTranslation } from '@/lib/translations';
 
 interface ChatMessage {
   role: 'user' | 'model';
@@ -37,6 +37,7 @@ export default function ChatInterface({ documentText, userRole, children }: Chat
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const { language } = useLanguage();
+  const t = useTranslation(language);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const handleSendMessage = useCallback(async (messageContent: string) => {
@@ -58,12 +59,12 @@ export default function ChatInterface({ documentText, userRole, children }: Chat
 
       setMessages(prev => [...prev, { role: 'model', content: response }]);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred.';
-      setMessages(prev => [...prev, { role: 'model', content: `Error: ${errorMessage}` }]);
+      const errorMessage = error instanceof Error ? error.message : t('unexpected_error');
+      setMessages(prev => [...prev, { role: 'model', content: `${t('error_prefix')}: ${errorMessage}` }]);
     } finally {
       setIsLoading(false);
     }
-  }, [documentText, userRole, language, messages, isLoading]);
+  }, [documentText, userRole, language, messages, isLoading, t]);
   
   useEffect(() => {
     // Scroll to the bottom whenever messages change
@@ -116,16 +117,16 @@ export default function ChatInterface({ documentText, userRole, children }: Chat
       </SheetTrigger>
       <SheetContent className="flex flex-col w-full sm:max-w-lg">
         <SheetHeader>
-          <SheetTitle>Ask the AI</SheetTitle>
+          <SheetTitle>{t('ask_the_ai')}</SheetTitle>
           <SheetDescription>
-            Have a conversation with the AI to ask specific questions about your document.
+            {t('chat_description')}
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-1 pr-4 -mr-4 my-4" ref={scrollAreaRef}>
           <div className="space-y-4 p-4">
             {messages.length === 0 && (
                 <div className="text-center text-muted-foreground p-8">
-                    <p>No messages yet. Start the conversation!</p>
+                    <p>{t('chat_no_messages')}</p>
                 </div>
             )}
             {messages.map((message, index) => (
@@ -138,7 +139,7 @@ export default function ChatInterface({ documentText, userRole, children }: Chat
                 </Avatar>
                 <div className="bg-muted rounded-lg p-3 flex items-center">
                     <LoaderCircle className="h-5 w-5 animate-spin text-primary" />
-                    <span className="ml-2 text-sm text-muted-foreground">AI is thinking...</span>
+                    <span className="ml-2 text-sm text-muted-foreground">{t('ai_is_thinking')}</span>
                 </div>
               </div>
             )}
@@ -150,14 +151,14 @@ export default function ChatInterface({ documentText, userRole, children }: Chat
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Type your question here..."
+                placeholder={t('chat_placeholder')}
                 className="pr-20 min-h-[60px]"
                 disabled={isLoading}
                 rows={1}
             />
             <div className="absolute bottom-3 right-3 flex items-center gap-2">
                 <p className="text-xs text-muted-foreground hidden sm:block">
-                    Shift + <CornerDownLeft size={12} className="inline-block" /> for new line
+                    {t('chat_shif_enter')} <CornerDownLeft size={12} className="inline-block" /> {t('chat_new_line')}
                 </p>
                 <Button
                 type="submit"
@@ -166,7 +167,7 @@ export default function ChatInterface({ documentText, userRole, children }: Chat
                 disabled={isLoading || !input.trim()}
                 >
                 <Send className="h-4 w-4" />
-                <span className="sr-only">Send</span>
+                <span className="sr-only">{t('chat_send_button')}</span>
                 </Button>
             </div>
             </div>
