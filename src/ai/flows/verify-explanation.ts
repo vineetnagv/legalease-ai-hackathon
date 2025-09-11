@@ -1,10 +1,8 @@
 
 'use server';
 
-import { ai } from '@/ai/genkit';
+import { verifierAgent as ai } from '@/ai/agents';
 import { z } from 'genkit';
-import type { ExplainClausesOutput } from './explain-clauses';
-
 
 /**
  * @fileOverview An AI agent that verifies if a batch of explanations are grounded in their source texts.

@@ -8,7 +8,7 @@
  * - AssessDocumentRiskOutput - The return type for the assessDocumentRisk function.
  */
 
-import {ai} from '@/ai/genkit';
+import { analyzerAgent as ai } from '@/ai/agents';
 import {z} from 'genkit';
 
 const AssessDocumentRiskInputSchema = z.object({

@@ -8,7 +8,7 @@
  * - GenerateFaqOutput - The return type for the generateFaq function.
  */
 
-import {ai} from '@/ai/genkit';
+import { analyzerAgent as ai } from '@/ai/agents';
 import {z} from 'genkit';
 
 const GenerateFaqInputSchema = z.object({

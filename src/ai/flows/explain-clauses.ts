@@ -9,7 +9,7 @@
  * - ExplainClausesOutput - The return type for the explainClauses function.
  */
 
-import {ai} from '@/ai/genkit';
+import { analyzerAgent as ai } from '@/ai/agents';
 import {z} from 'genkit';
 import { verifyBatchExplanation } from './verify-explanation';
 

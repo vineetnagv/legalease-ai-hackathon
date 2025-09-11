@@ -8,7 +8,7 @@
  * - ChatAboutDocumentOutput - The return type for the chatAboutDocument function.
  */
 
-import {ai} from '@/ai/genkit';
+import { chatAgent as ai } from '@/ai/agents';
 import {z} from 'genkit';
 
 const ChatMessageSchema = z.object({

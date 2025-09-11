@@ -8,7 +8,7 @@
  * - SuggestUserRoleOutput - The return type for the suggestUserRole function.
  */
 
-import {ai} from '@/ai/genkit';
+import { analyzerAgent as ai } from '@/ai/agents';
 import {z} from 'genkit';
 
 const SuggestUserRoleInputSchema = z.object({
