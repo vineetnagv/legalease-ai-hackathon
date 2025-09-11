@@ -72,8 +72,9 @@ export async function analyzeDocument(
   // Split the document into clauses for explanation.
   const clauses = splitIntoClauses(documentText);
   if (clauses.length === 0) {
+    // This now throws a more specific error.
     throw new Error(
-      'Could not find any clauses to analyze. Please ensure your document has distinct paragraphs.'
+      'Could not find any paragraphs to analyze. Please ensure your document is plain text and has distinct paragraphs separated by blank lines.'
     );
   }
 
@@ -87,8 +88,9 @@ export async function analyzeDocument(
 
     // This check is necessary because the `explainClauses` flow can sometimes return
     // an empty or invalid response, even if it doesn't throw an error.
+    // If it fails, we assume the AI couldn't handle the content.
     if (!explainedClauses || explainedClauses.length === 0) {
-      throw new Error('The AI failed to provide clause explanations. The document might be too short or in an unsupported format.');
+      throw new Error('The AI failed to provide clause explanations. The document might be too short, in an unsupported format, or contain content the AI cannot process.');
     }
 
     return {
