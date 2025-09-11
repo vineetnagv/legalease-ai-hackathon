@@ -1,67 +1,119 @@
 
 'use server';
 
-/**
- * @fileOverview An AI agent that verifies if an explanation is grounded in the source text.
- *
- * - verifyExplanation - A function that takes source text and an explanation and verifies it.
- * - VerifyExplanationInput - The input type for the verifyExplanation function.
- * - VerifyExplanationOutput - The return type for the verifyExplanation function.
- */
-
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import type { ExplainClausesOutput } from './explain-clauses';
 
-const VerifyExplanationInputSchema = z.object({
-  sourceText: z.string().describe('The original, authoritative text (e.g., a legal clause).'),
-  explanation: z.string().describe('The AI-generated explanation of the source text.'),
+
+/**
+ * @fileOverview An AI agent that verifies if a batch of explanations are grounded in their source texts.
+ *
+ * - verifyBatchExplanation - Verifies a batch of explanations against their source clauses.
+ * - VerifyBatchExplanationInput - Input for the batch verification function.
+ * - VerifyBatchExplanationOutput - Output for the batch verification function.
+ */
+
+// Schema for the input of the batch verifier flow
+const VerifyBatchExplanationInputSchema = z.object({
+  sourceClauses: z.array(z.string()).describe('The list of original, authoritative legal clauses.'),
+  explainedClauses: z.array(z.object({
+      original_text: z.string(),
+      plain_english_explanation: z.string(),
+  })).describe('The list of AI-generated explanations, corresponding to the source clauses.'),
 });
-export type VerifyExplanationInput = z.infer<typeof VerifyExplanationInputSchema>;
+export type VerifyBatchExplanationInput = z.infer<typeof VerifyBatchExplanationInputSchema>;
 
-const VerifyExplanationOutputSchema = z.object({
-  verified: z.boolean().describe("True if the explanation is accurate and grounded, false otherwise."),
-  reason: z.string().optional().describe("If not verified, a brief reason why. For example, 'The explanation mentions information not present in the source text.'"),
+
+// Schema for the detailed feedback on failed verifications
+const VerificationFailureFeedbackSchema = z.object({
+  clause_substring: z.string().describe("A short, unique substring from the original clause that failed verification."),
+  reason: z.string().describe("The reason for the verification failure (e.g., 'The explanation mentions information not present in the source text.').")
 });
-export type VerifyExplanationOutput = z.infer<typeof VerifyExplanationOutputSchema>;
+
+// Schema for the final output of the verifier prompt
+const VerifyBatchExplanationOutputSchema = z.object({
+  all_verified: z.boolean().describe("True if all explanations are accurate and grounded, false otherwise."),
+  feedback: z.array(VerificationFailureFeedbackSchema).describe("An array of feedback details for each explanation that failed verification. This should be empty if all are verified."),
+});
+export type VerifyBatchExplanationOutput = z.infer<typeof VerifyBatchExplanationOutputSchema>;
 
 
-export async function verifyExplanation(input: VerifyExplanationInput): Promise<VerifyExplanationOutput> {
-  return verifyExplanationFlow(input);
+export async function verifyBatchExplanation(input: VerifyBatchExplanationInput): Promise<VerifyBatchExplanationOutput> {
+  return verifyBatchExplanationFlow(input);
 }
 
+
 const verifierPrompt = ai.definePrompt({
-  name: 'verifyExplanationPrompt',
-  input: { schema: VerifyExplanationInputSchema },
-  output: { schema: VerifyExplanationOutputSchema },
-  prompt: `You are an AI verifier. Your sole purpose is to check if an explanation accurately and completely reflects the provided source text without adding any external information.
+  name: 'verifyBatchExplanationPrompt',
+  input: { schema: VerifyBatchExplanationInputSchema },
+  output: { schema: VerifyBatchExplanationOutputSchema },
+  prompt: `You are an AI verifier. Your sole purpose is to check if a list of explanations accurately and completely reflects their provided source texts without adding any external information.
 
-  You must answer with 'Yes' or 'No'.
-  - Answer 'Yes' if the explanation is a faithful summary of the source text.
-  - Answer 'No' if the explanation includes information not found in the source, or if it misrepresents the source.
+You will be given a list of source texts (clauses) and a corresponding list of explanations.
 
-  If you answer 'No,' you MUST provide a brief reason for the failure.
+For EACH pair, you must determine if the explanation is a faithful summary of the source text.
+- The explanation is VALID if it only contains information present in the source.
+- The explanation is INVALID if it includes information not found in the source, or if it misrepresents the source.
 
-  Source Text:
-  """
-  {{{sourceText}}}
-  """
+After reviewing all pairs, you must respond with a single JSON object.
 
-  Explanation to Verify:
-  """
-  {{{explanation}}}
-  """
+If ALL explanations are valid, respond with:
+{
+  "all_verified": true,
+  "feedback": []
+}
 
-  Does the explanation accurately and completely reflect the provided source text without adding any external information?
+If ANY explanation is invalid, respond with:
+{
+  "all_verified": false,
+  "feedback": [
+    {
+      "clause_substring": "<A short, unique quote from the original clause that failed>",
+      "reason": "<The specific reason why this explanation failed>"
+    }
+    // ... include an object for each failed explanation
+  ]
+}
+
+Here are the clauses and their explanations to verify:
+{{#each sourceClauses}}
+Pair {{_index}}:
+Source Text:
+"""
+{{{this}}}
+"""
+Explanation to Verify:
+"""
+{{{lookup ../explainedClauses _index "plain_english_explanation"}}}
+"""
+---
+{{/each}}
+
+Now, provide your final assessment of all pairs in the required JSON format.
   `,
 });
 
-const verifyExplanationFlow = ai.defineFlow(
+
+const verifyBatchExplanationFlow = ai.defineFlow(
   {
-    name: 'verifyExplanationFlow',
-    inputSchema: VerifyExplanationInputSchema,
-    outputSchema: VerifyExplanationOutputSchema,
+    name: 'verifyBatchExplanationFlow',
+    inputSchema: VerifyBatchExplanationInputSchema,
+    outputSchema: VerifyBatchExplanationOutputSchema,
   },
   async (input) => {
+    // Handle the case where the analyzer might have failed to produce a matching list
+    if (input.sourceClauses.length !== input.explainedClauses.length) {
+      console.error("Mismatch between number of source clauses and explained clauses.");
+      return {
+        all_verified: false,
+        feedback: [{
+          clause_substring: "N/A",
+          reason: "The number of explanations did not match the number of source clauses provided."
+        }]
+      };
+    }
+    
     const { output } = await verifierPrompt(input);
     return output!;
   }
