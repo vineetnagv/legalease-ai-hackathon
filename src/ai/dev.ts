@@ -8,4 +8,4 @@ import '@/ai/flows/assess-document-risk.ts';
 import '@/ai/flows/suggest-user-role.ts';
 import '@/ai/flows/generate-faq.ts';
 import '@/ai/flows/conversational-chat.ts';
-
+import '@/ai/flows/verify-explanation.ts';
