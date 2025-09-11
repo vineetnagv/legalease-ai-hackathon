@@ -16,6 +16,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
   SheetFooter,
 } from '@/components/ui/sheet';
 import { useTranslation } from '@/lib/translations';
