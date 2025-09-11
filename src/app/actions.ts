@@ -43,10 +43,10 @@ export async function suggestRole(documentText: string): Promise<string> {
   try {
     const { suggestedRole } = await suggestUserRole({ documentText });
     return suggestedRole;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error suggesting user role:', error);
-    // Return a sensible default in case of an error
-    return 'User';
+    // Pass the specific error message forward
+    throw new Error(error.message || 'An unknown error occurred while suggesting a role.');
   }
 }
 
@@ -103,15 +103,8 @@ export async function analyzeDocument(
   } catch (error: any) {
     console.error('Error during AI analysis:', error);
     
-    // Check for specific flow failures if possible, otherwise throw a generic message.
-    let friendlyMessage = 'An unexpected error occurred during the AI analysis. Please try again later.';
-    if (error.message) {
-      // You could add more checks here for specific error types from the AI flows.
-      friendlyMessage = `An error occurred during analysis: ${error.message}`;
-    }
-
-    // Provide a more user-friendly error message.
-    throw new Error(friendlyMessage);
+    // Provide a more user-friendly error message that includes the specific error.
+    throw new Error(error.message || 'An unexpected error occurred during the AI analysis.');
   }
 }
 
@@ -137,10 +130,6 @@ export async function getChatResponse(
     return answer;
   } catch (error: any) {
     console.error('Error getting chat response:', error);
-    let friendlyMessage = 'Sorry, I encountered an error while trying to answer. Please try again.';
-    if (error.message) {
-       friendlyMessage = `An error occurred: ${error.message}`;
-    }
-    throw new Error(friendlyMessage);
+    throw new Error(error.message || 'Sorry, I encountered an unknown error while trying to answer.');
   }
 }

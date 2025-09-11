@@ -32,7 +32,7 @@ const prompt = ai.definePrompt({
   output: {schema: SuggestUserRoleOutputSchema},
   prompt: `You are an AI assistant that analyzes legal documents. Your task is to determine the most likely role of a user based on the content of the document they've provided.
 
-  Analyze the following document text and suggest a single, concise role title. For example: "Tenant", "Landlord", "Employee", "Client", "Freelancer".
+  Analyze the following document text and suggest a single, concise but descriptive role title. For example: "Residential Tenant", "Commercial Landlord", "Software Development Employee", "Independent Contractor", "Client for Services".
 
   Document Text: {{{documentText}}}
 
