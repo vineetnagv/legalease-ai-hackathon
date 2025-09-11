@@ -13,7 +13,7 @@ import {
 import { suggestUserRole } from '@/ai/flows/suggest-user-role';
 import type { AnalysisResult } from '@/lib/types';
 import { generateFaq } from '@/ai/flows/generate-faq';
-import { supportedLanguages } from '@/lib/types';
+import { supportedLanguages, languageForAI } from '@/lib/types';
 import { chatAboutDocument, type ChatAboutDocumentInput } from '@/ai/flows/conversational-chat';
 import { detectMissingClauses } from '@/ai/flows/detect-missing-clauses';
 
@@ -67,7 +67,7 @@ export async function analyzeDocument(
     throw new Error('Document text and user role are required for analysis.');
   }
 
-  const language = supportedLanguages[languageCode];
+  const language = languageForAI[languageCode];
 
   // Split the document into clauses for explanation.
   const clauses = splitIntoClauses(documentText);
@@ -127,7 +127,7 @@ export async function getChatResponse(
     throw new Error('Document text and a question are required.');
   }
 
-  const language = supportedLanguages[input.languageCode];
+  const language = languageForAI[input.languageCode];
 
   try {
     const { answer } = await chatAboutDocument({
