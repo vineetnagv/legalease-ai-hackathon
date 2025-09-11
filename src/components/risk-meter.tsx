@@ -6,6 +6,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useLanguage } from '@/contexts/language-context';
+import { useTranslation } from '@/lib/translations';
 
 interface RiskMeterProps {
   riskScore: number;
@@ -18,6 +20,9 @@ export default function RiskMeter({
   riskLevel,
   summary,
 }: RiskMeterProps) {
+  const { language } = useLanguage();
+  const t = useTranslation(language);
+
   const riskColorClass = {
     Low: 'text-risk-low',
     Medium: 'text-risk-medium',
@@ -33,10 +38,9 @@ export default function RiskMeter({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">Risk Meter</CardTitle>
+        <CardTitle className="text-2xl">{t('risk_meter')}</CardTitle>
         <CardDescription>
-          An AI-powered assessment of the document's potential risks for your
-          role.
+          {t('risk_assessment_description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -60,7 +64,7 @@ export default function RiskMeter({
           </div>
         </div>
         <div>
-          <h4 className="font-semibold">Summary of Findings:</h4>
+          <h4 className="font-semibold">{t('summary_of_findings')}</h4>
           <p className="text-muted-foreground">{summary}</p>
         </div>
       </CardContent>

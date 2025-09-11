@@ -1,7 +1,10 @@
+'use client';
+
 import { Logo } from "@/components/icons";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/firebase/auth-context";
+import { useLanguage } from "@/contexts/language-context";
+import { useTranslation } from "@/lib/translations";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -11,6 +14,9 @@ export default function SettingsLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { language } = useLanguage();
+  const t = useTranslation(language);
+
   return (
     <>
       <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-md sm:px-6">
@@ -23,7 +29,7 @@ export default function SettingsLayout({
             <Button asChild variant="outline">
                 <Link href="/">
                     <ChevronLeft className="mr-2 h-4 w-4" />
-                    Back to App
+                    {t('back_to_app')}
                 </Link>
             </Button>
         </div>

@@ -39,20 +39,15 @@ import FaqSection from './faq-section';
 import { ThemeToggle } from './theme-toggle';
 import { useLanguage } from '@/contexts/language-context';
 import { LanguageSelector } from './language-selector';
+import { useTranslation } from '@/lib/translations';
 
 type Status = 'idle' | 'suggesting_role' | 'processing' | 'success' | 'error';
-
-const LOADING_MESSAGES = [
-  'Uploading document...',
-  'Extracting text...',
-  'Analyzing with AI... this may take a moment.',
-  'Compiling your report...',
-];
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const { language } = useLanguage();
+  const t = useTranslation(language);
 
   const [status, setStatus] = useState<Status>('idle');
   const [file, setFile] = useState<File | null>(null);
@@ -70,6 +65,14 @@ export default function Dashboard() {
   const userRole = useMemo(() => {
     return selectedRoleOption === 'other' ? customRole : selectedRoleOption;
   }, [selectedRoleOption, customRole]);
+  
+  const LOADING_MESSAGES = useMemo(() => [
+    t('uploading_document'),
+    t('extracting_text'),
+    t('analyzing_with_ai'),
+    t('compiling_report'),
+  ], [t]);
+
 
   const canAnalyze = useMemo(() => file && userRole, [file, userRole]);
 
@@ -157,7 +160,7 @@ export default function Dashboard() {
       setStatus('error');
       toast({
         variant: 'destructive',
-        title: 'Analysis Failed',
+        title: t('analysis_error'),
         description: errorMessage,
       });
     } finally {
@@ -204,13 +207,13 @@ export default function Dashboard() {
               <DropdownMenuItem asChild className="cursor-pointer">
                   <Link href="/settings">
                       <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
+                      <span>{t('settings')}</span>
                   </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
+                <span>{t('logout')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -221,10 +224,10 @@ export default function Dashboard() {
         <div className="mx-auto max-w-4xl space-y-8">
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Legal Document Analysis
+              {t('legal_document_analysis')}
             </h1>
             <p className="text-lg text-muted-foreground">
-              Upload your document and get AI-Powered insights.
+              {t('upload_and_get_insights')}
             </p>
           </div>
 
@@ -253,7 +256,7 @@ export default function Dashboard() {
                     <div className="text-center">
                       <LoaderCircle className="mx-auto h-12 w-12 animate-spin text-primary" />
                       <p className="mt-4 text-lg font-medium">
-                        {status === 'processing' ? LOADING_MESSAGES[loadingStep] : 'Suggesting your role...'}
+                        {status === 'processing' ? LOADING_MESSAGES[loadingStep] : t('suggesting_role')}
                       </p>
                     </div>
                   ) : file ? (
@@ -261,39 +264,39 @@ export default function Dashboard() {
                       <FileText className="mx-auto h-12 w-12" />
                       <p className="mt-2 font-semibold">{file.name}</p>
                       <Button variant="link" size="sm" onClick={(e) => { e.stopPropagation(); handleReset(); }}>
-                        Remove file
+                        {t('remove_file')}
                       </Button>
                     </div>
                   ) : (
                     <div className="text-center text-muted-foreground">
                       <UploadCloud className="mx-auto h-12 w-12" />
                       <p className="mt-4 font-semibold">
-                        Drag & Drop Your Document Here
+                        {t('drag_and_drop')}
                       </p>
-                      <p className="text-sm">or click to browse</p>
-                      <p className="mt-2 text-xs">PDF, DOCX, or TXT files only</p>
+                      <p className="text-sm">{t('or_click_browse')}</p>
+                      <p className="mt-2 text-xs">{t('file_types')}</p>
                     </div>
                   )}
                 </div>
                 
                 {file && !isRoleSelectionDisabled && (
                     <div className="space-y-4">
-                        <label className="text-sm font-medium">Confirm your role in this agreement:</label>
+                        <label className="text-sm font-medium">{t('confirm_your_role')}</label>
                         <RadioGroup value={selectedRoleOption} onValueChange={setSelectedRoleOption} disabled={isRoleSelectionDisabled}>
                             {suggestedRole && suggestedRole !== 'Other' && (
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value={suggestedRole} id={`role-${suggestedRole}`} />
-                                    <Label htmlFor={`role-${suggestedRole}`}>{suggestedRole} (AI Suggestion)</Label>
+                                    <Label htmlFor={`role-${suggestedRole}`}>{suggestedRole} {t('ai_suggestion')}</Label>
                                 </div>
                             )}
                             <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="other" id="role-other" />
-                                <Label htmlFor="role-other">Other</Label>
+                                <Label htmlFor="role-other">{t('other')}</Label>
                             </div>
                         </RadioGroup>
                         {selectedRoleOption === 'other' && (
                             <Input 
-                                placeholder="Please specify your role"
+                                placeholder={t('specify_your_role')}
                                 value={customRole}
                                 onChange={(e) => setCustomRole(e.target.value)}
                                 disabled={isRoleSelectionDisabled}
@@ -308,7 +311,7 @@ export default function Dashboard() {
                   className="w-full"
                   size="lg"
                 >
-                  {status === 'processing' ? 'Analyzing...' : 'Analyze Document'}
+                  {status === 'processing' ? t('analyzing') : t('analyze_document')}
                 </Button>
               </CardContent>
             </Card>
@@ -317,9 +320,9 @@ export default function Dashboard() {
           {status === 'error' && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Analysis Error</AlertTitle>
+              <AlertTitle>{t('analysis_error')}</AlertTitle>
               <AlertDescription>
-                {error} Please try again with a different file or contact support.
+                {error} {t('error_message_prefix')}
               </AlertDescription>
             </Alert>
           )}
@@ -331,10 +334,10 @@ export default function Dashboard() {
                    <FileText className="h-8 w-8 text-primary" />
                    <div>
                      <p className="font-bold">{file?.name}</p>
-                     <p className="text-sm text-muted-foreground">Role: {userRole}</p>
+                     <p className="text-sm text-muted-foreground">{t('role')}: {userRole}</p>
                    </div>
                 </div>
-                <Button onClick={handleReset} variant="outline">Analyze New Document</Button>
+                <Button onClick={handleReset} variant="outline">{t('analyze_new_document')}</Button>
               </div>
 
               <RiskMeter

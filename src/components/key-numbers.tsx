@@ -8,6 +8,8 @@ import {
 import { Badge } from './ui/badge';
 import { AlertTriangle } from 'lucide-react';
 import type { AnalysisResult } from '@/lib/types';
+import { useLanguage } from '@/contexts/language-context';
+import { useTranslation } from '@/lib/translations';
 
 interface KeyNumbersProps {
   keyNumbers: AnalysisResult['keyNumbers'];
@@ -15,14 +17,15 @@ interface KeyNumbersProps {
 
 export default function KeyNumbers({ keyNumbers }: KeyNumbersProps) {
   const hasNumbers = keyNumbers && keyNumbers.length > 0;
+  const { language } = useLanguage();
+  const t = useTranslation(language);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">Key Numbers & Dates</CardTitle>
+        <CardTitle className="text-2xl">{t('key_numbers_dates')}</CardTitle>
         <CardDescription>
-          Important figures and dates automatically extracted from the
-          document.
+          {t('key_numbers_description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -43,10 +46,9 @@ export default function KeyNumbers({ keyNumbers }: KeyNumbersProps) {
         ) : (
           <div className="flex flex-col items-center justify-center rounded-lg border-dashed border-2 p-12 text-center text-muted-foreground">
             <AlertTriangle className="h-10 w-10" />
-            <p className="mt-4 font-semibold">No Key Numbers Found</p>
+            <p className="mt-4 font-semibold">{t('no_key_numbers_found')}</p>
             <p className="mt-1 text-sm">
-              The AI could not automatically extract key numbers or dates from
-              this document.
+              {t('no_key_numbers_description')}
             </p>
           </div>
         )}

@@ -12,6 +12,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { useLanguage } from '@/contexts/language-context';
+import { useTranslation } from '@/lib/translations';
 import { HelpCircle } from 'lucide-react';
 
 interface FaqSectionProps {
@@ -21,14 +23,15 @@ interface FaqSectionProps {
 export default function FaqSection({ faqData }: FaqSectionProps) {
   const { faqs } = faqData;
   const hasFaqs = faqs && faqs.length > 0;
+  const { language } = useLanguage();
+  const t = useTranslation(language);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">AI-Generated FAQs</CardTitle>
+        <CardTitle className="text-2xl">{t('ai_generated_faqs')}</CardTitle>
         <CardDescription>
-          Frequently asked questions and "what if" scenarios based on your
-          document.
+          {t('faq_description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -48,9 +51,9 @@ export default function FaqSection({ faqData }: FaqSectionProps) {
         ) : (
           <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 text-center text-muted-foreground">
             <HelpCircle className="h-10 w-10" />
-            <p className="mt-4 font-semibold">No FAQs Generated</p>
+            <p className="mt-4 font-semibold">{t('no_faqs_generated')}</p>
             <p className="mt-1 text-sm">
-              The AI could not automatically generate FAQs for this document.
+              {t('no_faqs_description')}
             </p>
           </div>
         )}

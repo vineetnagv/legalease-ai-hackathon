@@ -12,6 +12,8 @@ import { Label } from './ui/label';
 import { Separator } from './ui/separator';
 import { Progress } from './ui/progress';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { useLanguage } from '@/contexts/language-context';
+import { useTranslation } from '@/lib/translations';
 
 const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
     <div className={`flex items-center text-sm ${met ? 'text-green-600' : 'text-muted-foreground'}`}>
@@ -23,6 +25,8 @@ const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
 export default function LoginPage() {
   const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
   const { toast } = useToast();
+  const { language } = useLanguage();
+  const t = useTranslation(language);
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -107,54 +111,54 @@ export default function LoginPage() {
             <h1 className="text-2xl font-bold text-foreground">Legalease AI</h1>
           </div>
           <CardTitle className="text-3xl font-bold tracking-tight">
-            Understand Your Legal Documents
+            {t('login_title')}
           </CardTitle>
           <CardDescription className="text-muted-foreground">
-            Sign in or create an account to get started.
+            {t('login_description')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" onValueChange={() => { setEmail(''); setPassword(''); }}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">{t('signin')}</TabsTrigger>
+              <TabsTrigger value="signup">{t('signup')}</TabsTrigger>
             </TabsList>
             <TabsContent value="signin" className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="email-signin">Email</Label>
+                <Label htmlFor="email-signin">{t('email')}</Label>
                 <Input id="email-signin" type="email" placeholder="m@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password-signin">Password</Label>
+                <Label htmlFor="password-signin">{t('password')}</Label>
                 <Input id="password-signin" type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
               </div>
               <Button onClick={() => handleAuthAction('signIn')} className="w-full" disabled={loading}>
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading ? t('signing_in') : t('signin_button')}
               </Button>
             </TabsContent>
             <TabsContent value="signup" className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="email-signup">Email</Label>
+                <Label htmlFor="email-signup">{t('email')}</Label>
                 <Input id="email-signup" type="email" placeholder="m@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={loading}/>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password-signup">Password</Label>
+                <Label htmlFor="password-signup">{t('password')}</Label>
                 <Input id="password-signup" type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={loading}/>
               </div>
                {password.length > 0 && (
                 <div className="space-y-2">
                     <Progress value={passwordValidation.progress} className="h-2" />
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 pt-1'>
-                        <PasswordRequirement met={passwordValidation.isLongEnough} text="At least 8 characters" />
-                        <PasswordRequirement met={passwordValidation.hasUpperCase} text="One uppercase letter" />
-                        <PasswordRequirement met={passwordValidation.hasLowerCase} text="One lowercase letter" />
-                        <PasswordRequirement met={passwordValidation.hasNumber} text="One number" />
-                        <PasswordRequirement met={passwordValidation.hasSpecialChar} text="One special character" />
+                        <PasswordRequirement met={passwordValidation.isLongEnough} text={t('password_strength_8_chars')} />
+                        <PasswordRequirement met={passwordValidation.hasUpperCase} text={t('password_strength_uppercase')} />
+                        <PasswordRequirement met={passwordValidation.hasLowerCase} text={t('password_strength_lowercase')} />
+                        <PasswordRequirement met={passwordValidation.hasNumber} text={t('password_strength_number')} />
+                        <PasswordRequirement met={passwordValidation.hasSpecialChar} text={t('password_strength_special')} />
                     </div>
                 </div>
               )}
               <Button onClick={() => handleAuthAction('signUp')} className="w-full" disabled={loading || !passwordValidation.isValid}>
-                {loading ? 'Creating Account...' : 'Create Account'}
+                {loading ? t('creating_account') : t('create_account_button')}
               </Button>
             </TabsContent>
           </Tabs>
@@ -165,7 +169,7 @@ export default function LoginPage() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
+                {t('or_continue_with')}
               </span>
             </div>
           </div>

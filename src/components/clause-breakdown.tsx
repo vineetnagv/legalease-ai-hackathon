@@ -18,6 +18,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useLanguage } from '@/contexts/language-context';
+import { useTranslation } from '@/lib/translations';
 
 interface ClauseBreakdownProps {
   clauses: ExplainClausesOutput;
@@ -70,13 +72,15 @@ function JargonBuster({
 }
 
 export default function ClauseBreakdown({ clauses }: ClauseBreakdownProps) {
+  const { language } = useLanguage();
+  const t = useTranslation(language);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">Clause-by-Clause Breakdown</CardTitle>
+        <CardTitle className="text-2xl">{t('clause_breakdown')}</CardTitle>
         <CardDescription>
-          An explanation of each major clause in plain English, with legal
-          jargon highlighted.
+          {t('clause_breakdown_description')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -98,13 +102,13 @@ export default function ClauseBreakdown({ clauses }: ClauseBreakdownProps) {
                 <AccordionContent className="space-y-4">
                   <div className="grid gap-6 md:grid-cols-2">
                     <div className="space-y-2">
-                      <h4 className="font-semibold">Original Clause</h4>
+                      <h4 className="font-semibold">{t('original_clause')}</h4>
                       <div className="prose prose-sm max-w-none rounded-md border bg-muted/50 p-3 text-muted-foreground">
                         <p>{clause.original_text}</p>
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-semibold">Plain English Explanation</h4>
+                      <h4 className="font-semibold">{t('plain_english_explanation')}</h4>
                        <div className="rounded-md border border-primary/20 bg-primary/5 p-3">
                         <JargonBuster
                             explanation={clause.plain_english_explanation}
