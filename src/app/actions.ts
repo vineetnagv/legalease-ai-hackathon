@@ -15,6 +15,7 @@ import type { AnalysisResult } from '@/lib/types';
 import { generateFaq } from '@/ai/flows/generate-faq';
 import { supportedLanguages } from '@/lib/types';
 import { chatAboutDocument, type ChatAboutDocumentInput } from '@/ai/flows/conversational-chat';
+import { detectMissingClauses } from '@/ai/flows/detect-missing-clauses';
 
 /**
  * Splits a document's text into an array of clauses.
@@ -78,11 +79,12 @@ export async function analyzeDocument(
 
   try {
     // Run all AI analysis flows in parallel for efficiency.
-    const [risk, keyNumbersResult, explainedClauses, faqResult] = await Promise.all([
+    const [risk, keyNumbersResult, explainedClauses, faqResult, missingClausesResult] = await Promise.all([
       assessDocumentRisk({ documentText, userRole, language }),
       extractKeyNumbers({ documentText, language }),
       explainClauses({ clauses, userRole, language }),
       generateFaq({ documentText, userRole, language }),
+      detectMissingClauses({documentText, userRole, language})
     ]);
 
     // This check is necessary because the `explainClauses` flow can sometimes return
@@ -96,6 +98,7 @@ export async function analyzeDocument(
       keyNumbers: keyNumbersResult.keyNumbers,
       clauseBreakdown: explainedClauses,
       faq: faqResult,
+      missingClauses: missingClausesResult
     };
   } catch (error: any) {
     console.error('Error during AI analysis:', error);

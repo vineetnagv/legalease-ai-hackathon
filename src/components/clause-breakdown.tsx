@@ -34,24 +34,25 @@ function JargonBuster({
   jargonTerms,
 }: {
   explanation: string;
-  jargonTerms: string[];
+  jargonTerms: { term: string; definition: string }[];
 }) {
   if (!jargonTerms || jargonTerms.length === 0) {
     return <p className="text-foreground/90">{explanation}</p>;
   }
   
+  const allJargon = jargonTerms.map(j => j.term).join('|');
   // Create a case-insensitive regex to find all jargon terms
-  const regex = new RegExp(`(${jargonTerms.join('|')})`, 'gi');
+  const regex = new RegExp(`(${allJargon})`, 'gi');
   const parts = explanation.split(regex);
 
   return (
-    <p className="text-foreground/90">
+    <p className="text-foreground/90 leading-relaxed">
       {parts.map((part, i) => {
-        const isJargon = jargonTerms.some(
-          (term) => part.toLowerCase() === term.toLowerCase()
+        const matchingJargon = jargonTerms.find(
+          (jargon) => part.toLowerCase() === jargon.term.toLowerCase()
         );
 
-        if (isJargon) {
+        if (matchingJargon) {
           return (
             <Tooltip key={i}>
               <TooltipTrigger asChild>
@@ -59,8 +60,9 @@ function JargonBuster({
                   {part}
                 </span>
               </TooltipTrigger>
-              <TooltipContent>
-                <p>This is considered legal jargon.</p>
+              <TooltipContent className="max-w-xs">
+                <p className="font-bold">{matchingJargon.term}</p>
+                <p>{matchingJargon.definition}</p>
               </TooltipContent>
             </Tooltip>
           );

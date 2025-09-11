@@ -1,4 +1,5 @@
 import type { AssessDocumentRiskOutput } from '@/ai/flows/assess-document-risk';
+import type { DetectMissingClausesOutput } from '@/ai/flows/detect-missing-clauses';
 import type { ExplainClausesOutput } from '@/ai/flows/explain-clauses';
 import type { ExtractKeyNumbersOutput } from '@/ai/flows/extract-key-numbers';
 import type { GenerateFaqOutput } from '@/ai/flows/generate-faq';
@@ -8,6 +9,7 @@ export type AnalysisResult = {
   keyNumbers: ExtractKeyNumbersOutput['keyNumbers'];
   clauseBreakdown: ExplainClausesOutput;
   faq: GenerateFaqOutput;
+  missingClauses: DetectMissingClausesOutput;
 };
 
 export const supportedLanguages = {

@@ -41,6 +41,7 @@ import { useLanguage } from '@/contexts/language-context';
 import { LanguageSelector } from './language-selector';
 import { useTranslation } from '@/lib/translations';
 import ChatInterface from './chat-interface';
+import MissingClauses from './missing-clauses';
 
 type Status = 'idle' | 'suggesting_role' | 'processing' | 'success' | 'error';
 
@@ -348,6 +349,7 @@ export default function Dashboard() {
                 riskLevel={analysisResult.riskAssessment.riskLevel}
                 summary={analysisResult.riskAssessment.summary}
               />
+              <MissingClauses missingClauses={analysisResult.missingClauses} />
               <KeyNumbers keyNumbers={analysisResult.keyNumbers} />
               <ClauseBreakdown clauses={analysisResult.clauseBreakdown} />
               <FaqSection faqData={analysisResult.faq} />
