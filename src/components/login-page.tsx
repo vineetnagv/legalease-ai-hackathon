@@ -13,6 +13,8 @@ import { Progress } from './ui/progress';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
 import { useTranslation } from '@/lib/translations';
+import { ThemeToggle } from './theme-toggle';
+import { LanguageSelector } from './language-selector';
 
 const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
     <div className={`flex items-center text-sm ${met ? 'text-green-600' : 'text-muted-foreground'}`}>
@@ -102,7 +104,12 @@ export default function LoginPage() {
 
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
+    <div className="relative flex min-h-screen w-full items-center justify-center bg-background p-4">
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <LanguageSelector />
+        <ThemeToggle />
+      </div>
+
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex items-center justify-center gap-2">
