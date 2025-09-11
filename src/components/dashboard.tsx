@@ -11,6 +11,7 @@ import {
   LogOut,
   UploadCloud,
   Settings,
+  MessageSquarePlus,
 } from 'lucide-react';
 import type { AnalysisResult, LanguageCode } from '@/lib/types';
 import { analyzeDocument, suggestRole } from '@/app/actions';
@@ -341,7 +342,15 @@ export default function Dashboard() {
                      <p className="text-sm text-muted-foreground">{t('role')}: {userRole}</p>
                    </div>
                 </div>
-                <Button onClick={handleReset} variant="outline">{t('analyze_new_document')}</Button>
+                <div className="flex gap-2">
+                  <ChatInterface documentText={documentText} userRole={userRole}>
+                    <Button variant="outline">
+                      <MessageSquarePlus className="mr-2 h-4 w-4" />
+                      Ask the AI
+                    </Button>
+                  </ChatInterface>
+                  <Button onClick={handleReset} variant="default">{t('analyze_new_document')}</Button>
+                </div>
               </div>
 
               <RiskMeter
@@ -353,7 +362,6 @@ export default function Dashboard() {
               <KeyNumbers keyNumbers={analysisResult.keyNumbers} />
               <ClauseBreakdown clauses={analysisResult.clauseBreakdown} />
               <FaqSection faqData={analysisResult.faq} />
-              <ChatInterface documentText={documentText} userRole={userRole} />
             </div>
           )}
         </div>
