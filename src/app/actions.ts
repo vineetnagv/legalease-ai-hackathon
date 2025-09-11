@@ -51,7 +51,7 @@ export async function suggestRole(documentText: string): Promise<string> {
 }
 
 /**
- * Analyzes a legal document by calling multiple AI flows in parallel.
+ * Analyzes a legal document by calling multiple AI flows sequentially.
  * @param documentText The full text content of the legal document.
  * @param userRole The user's role in the agreement (e.g., "Tenant").
  * @param languageCode The language code for the output (e.g., "en", "hi").
@@ -78,14 +78,12 @@ export async function analyzeDocument(
   }
 
   try {
-    // Run all AI analysis flows in parallel for efficiency.
-    const [risk, keyNumbersResult, explainedClauses, faqResult, missingClausesResult] = await Promise.all([
-      assessDocumentRisk({ documentText, userRole, language }),
-      extractKeyNumbers({ documentText, language }),
-      explainClauses({ clauses, userRole, language }),
-      generateFaq({ documentText, userRole, language }),
-      detectMissingClauses({documentText, userRole, language})
-    ]);
+    // Run AI analysis flows sequentially to avoid rate-limiting.
+    const risk = await assessDocumentRisk({ documentText, userRole, language });
+    const keyNumbersResult = await extractKeyNumbers({ documentText, language });
+    const explainedClauses = await explainClauses({ clauses, userRole, language });
+    const faqResult = await generateFaq({ documentText, userRole, language });
+    const missingClausesResult = await detectMissingClauses({documentText, userRole, language});
 
     // This check is necessary because the `explainClauses` flow can sometimes return
     // an empty or invalid response, even if it doesn't throw an error.
