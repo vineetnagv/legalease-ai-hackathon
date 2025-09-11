@@ -9,7 +9,6 @@ import { GoogleGLogo, Logo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
-import { Separator } from './ui/separator';
 import { Progress } from './ui/progress';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { useLanguage } from '@/contexts/language-context';
@@ -103,7 +102,7 @@ export default function LoginPage() {
 
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-4">
+    <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex items-center justify-center gap-2">
