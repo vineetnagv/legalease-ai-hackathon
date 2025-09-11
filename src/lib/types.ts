@@ -9,3 +9,14 @@ export type AnalysisResult = {
   clauseBreakdown: ExplainClausesOutput;
   faq: GenerateFaqOutput;
 };
+
+export const supportedLanguages = {
+  en: 'English',
+  hi: 'हिंदी (Hindi)',
+  ta: 'தமிழ் (Tamil)',
+  kn: 'ಕನ್ನಡ (Kannada)',
+  bn: 'বাংলা (Bengali)',
+  mr: 'मराठी (Marathi)',
+} as const;
+
+export type LanguageCode = keyof typeof supportedLanguages;

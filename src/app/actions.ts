@@ -13,6 +13,7 @@ import {
 import { suggestUserRole } from '@/ai/flows/suggest-user-role';
 import type { AnalysisResult } from '@/lib/types';
 import { generateFaq } from '@/ai/flows/generate-faq';
+import { supportedLanguages } from '@/lib/types';
 
 /**
  * Splits a document's text into an array of clauses.
@@ -51,16 +52,20 @@ export async function suggestRole(documentText: string): Promise<string> {
  * Analyzes a legal document by calling multiple AI flows in parallel.
  * @param documentText The full text content of the legal document.
  * @param userRole The user's role in the agreement (e.g., "Tenant").
+ * @param languageCode The language code for the output (e.g., "en", "hi").
  * @returns A promise that resolves to a consolidated `AnalysisResult` object.
  * @throws An error if documentText or userRole is missing.
  */
 export async function analyzeDocument(
   documentText: string,
-  userRole: string
+  userRole: string,
+  languageCode: keyof typeof supportedLanguages
 ): Promise<AnalysisResult> {
   if (!documentText || !userRole) {
     throw new Error('Document text and user role are required for analysis.');
   }
+
+  const language = supportedLanguages[languageCode];
 
   // Split the document into clauses for explanation.
   const clauses = splitIntoClauses(documentText);
@@ -73,10 +78,10 @@ export async function analyzeDocument(
   try {
     // Run all AI analysis flows in parallel for efficiency.
     const [risk, keyNumbersResult, explainedClauses, faqResult] = await Promise.all([
-      assessDocumentRisk({ documentText, userRole }),
-      extractKeyNumbers({ documentText }),
-      explainClauses({ clauses, userRole }),
-      generateFaq({ documentText, userRole }),
+      assessDocumentRisk({ documentText, userRole, language }),
+      extractKeyNumbers({ documentText, language }),
+      explainClauses({ clauses, userRole, language }),
+      generateFaq({ documentText, userRole, language }),
     ]);
 
     // This check is necessary because the `explainClauses` flow can sometimes return

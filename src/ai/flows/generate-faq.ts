@@ -14,6 +14,7 @@ import {z} from 'genkit';
 const GenerateFaqInputSchema = z.object({
   documentText: z.string().describe('The text content of the legal document.'),
   userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).'),
+  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
 });
 export type GenerateFaqInput = z.infer<typeof GenerateFaqInputSchema>;
 
@@ -35,6 +36,8 @@ const prompt = ai.definePrompt({
   input: {schema: GenerateFaqInputSchema},
   output: {schema: GenerateFaqOutputSchema},
   prompt: `You are an AI legal assistant. Your task is to generate a list of frequently asked questions (FAQs) based on the provided legal document. These FAQs should be relevant to the user's specified role.
+
+  IMPORTANT: Your entire response (questions and answers) must be in the following language: {{{language}}}
 
   Include questions that cover key aspects of the document, potential ambiguities, and "what if" scenarios that the user might encounter. For example: "What if I am late on a payment?", "What are my rights if the other party breaches the contract?".
 

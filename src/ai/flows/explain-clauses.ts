@@ -15,7 +15,8 @@ const ExplainClausesInputSchema = z.object({
   clauses: z.array(
     z.string().describe('A legal clause from the document.')
   ).describe('The legal clauses to be explained.'),
-  userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).')
+  userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).'),
+  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
 });
 export type ExplainClausesInput = z.infer<typeof ExplainClausesInputSchema>;
 
@@ -39,6 +40,8 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI legal assistant specializing in simplifying complex legal documents for average people.
 
 You will receive an array of legal clauses and your task is to explain each clause in plain English, so it can be easily understood by someone without legal expertise. For each clause, you should also identify any jargon terms and include them in the jargon_terms array.
+
+IMPORTANT: Your entire response must be in the following language: {{{language}}}
 
 User Role: {{{userRole}}}
 

@@ -14,6 +14,7 @@ import {z} from 'genkit';
 const AssessDocumentRiskInputSchema = z.object({
   documentText: z.string().describe('The text content of the legal document.'),
   userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).'),
+  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
 });
 export type AssessDocumentRiskInput = z.infer<typeof AssessDocumentRiskInputSchema>;
 
@@ -36,6 +37,8 @@ const assessDocumentRiskPrompt = ai.definePrompt({
 
   Based on the document text and the user's role, determine the overall risk level (Low, Medium, or High) and provide a numerical risk score (0-100).
   Also, provide a brief summary of the key risks identified in the document.
+
+  IMPORTANT: Your entire response must be in the following language: {{{language}}}
 
   Document Text: {{{documentText}}}
   User Role: {{{userRole}}}

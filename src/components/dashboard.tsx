@@ -12,7 +12,7 @@ import {
   UploadCloud,
   Settings,
 } from 'lucide-react';
-import type { AnalysisResult } from '@/lib/types';
+import type { AnalysisResult, LanguageCode } from '@/lib/types';
 import { analyzeDocument, suggestRole } from '@/app/actions';
 import Link from 'next/link';
 
@@ -37,6 +37,8 @@ import KeyNumbers from './key-numbers';
 import ClauseBreakdown from './clause-breakdown';
 import FaqSection from './faq-section';
 import { ThemeToggle } from './theme-toggle';
+import { useLanguage } from '@/contexts/language-context';
+import { LanguageSelector } from './language-selector';
 
 type Status = 'idle' | 'suggesting_role' | 'processing' | 'success' | 'error';
 
@@ -50,6 +52,7 @@ const LOADING_MESSAGES = [
 export default function Dashboard() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const { language } = useLanguage();
 
   const [status, setStatus] = useState<Status>('idle');
   const [file, setFile] = useState<File | null>(null);
@@ -145,7 +148,7 @@ export default function Dashboard() {
     try {
       if (!file) throw new Error("File is not selected.");
       const fileText = await file.text();
-      const result = await analyzeDocument(fileText, userRole);
+      const result = await analyzeDocument(fileText, userRole, language);
       setAnalysisResult(result);
       setStatus('success');
     } catch (e: unknown) {
@@ -182,6 +185,7 @@ export default function Dashboard() {
           <span className="text-xl font-bold">Legalease AI</span>
         </div>
         <div className="flex items-center gap-2">
+          <LanguageSelector />
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
