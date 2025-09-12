@@ -17,6 +17,7 @@ import {
   signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { auth } from './config';
+import { FirebaseError } from 'firebase/app';
 
 interface AuthContextType {
   user: User | null;
@@ -92,3 +93,5 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
+    

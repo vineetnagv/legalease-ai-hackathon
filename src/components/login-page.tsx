@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/language-context';
 import { useTranslation } from '@/lib/translations';
 import { ThemeToggle } from './theme-toggle';
 import { LanguageSelector } from './language-selector';
+import { FirebaseError } from 'firebase/app';
 
 const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
     <div className={`flex items-center text-sm ${met ? 'text-green-600' : 'text-muted-foreground'}`}>
@@ -77,11 +78,15 @@ export default function LoginPage() {
         });
       }
     } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: t('auth_error'),
-        description: error.message,
-      });
+        let description = error.message;
+        if (error instanceof FirebaseError && error.code === 'auth/invalid-credential') {
+            description = t('invalid_credentials');
+        }
+        toast({
+            variant: 'destructive',
+            title: t('auth_error'),
+            description: description,
+        });
     } finally {
       setLoading(false);
     }
@@ -194,3 +199,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    
