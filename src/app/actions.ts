@@ -3,19 +3,35 @@
 
 import {
   assessDocumentRisk,
+  type AssessDocumentRiskInput,
+  type AssessDocumentRiskOutput,
 } from '@/ai/flows/assess-document-risk';
 import {
   extractKeyNumbers,
+  type ExtractKeyNumbersInput,
+  type ExtractKeyNumbersOutput,
 } from '@/ai/flows/extract-key-numbers';
 import {
   explainClauses,
+  type ExplainClausesInput,
+  type ExplainClausesOutput,
 } from '@/ai/flows/explain-clauses';
 import { suggestUserRole } from '@/ai/flows/suggest-user-role';
-import type { AnalysisResult } from '@/lib/types';
-import { generateFaq } from '@/ai/flows/generate-faq';
+import {
+  generateFaq,
+  type GenerateFaqInput,
+  type GenerateFaqOutput,
+} from '@/ai/flows/generate-faq';
 import { supportedLanguages, languageForAI } from '@/lib/types';
-import { chatAboutDocument, type ChatAboutDocumentInput } from '@/ai/flows/conversational-chat';
-import { detectMissingClauses } from '@/ai/flows/detect-missing-clauses';
+import {
+  chatAboutDocument,
+  type ChatAboutDocumentInput,
+} from '@/ai/flows/conversational-chat';
+import {
+  detectMissingClauses,
+  type DetectMissingClausesInput,
+  type DetectMissingClausesOutput,
+} from '@/ai/flows/detect-missing-clauses';
 
 /**
  * Splits a document's text into an array of clauses.
@@ -46,67 +62,70 @@ export async function suggestRole(documentText: string): Promise<string> {
   } catch (error: any) {
     console.error('Error suggesting user role:', error);
     // Pass the specific error message forward
-    throw new Error(error.message || 'An unknown error occurred while suggesting a role.');
-  }
-}
-
-/**
- * Analyzes a legal document by calling multiple AI flows sequentially.
- * @param documentText The full text content of the legal document.
- * @param userRole The user's role in the agreement (e.g., "Tenant").
- * @param languageCode The language code for the output (e.g., "en", "hi").
- * @returns A promise that resolves to a consolidated `AnalysisResult` object.
- * @throws An error if documentText or userRole is missing.
- */
-export async function analyzeDocument(
-  documentText: string,
-  userRole: string,
-  languageCode: keyof typeof supportedLanguages
-): Promise<AnalysisResult> {
-  if (!documentText || !userRole) {
-    throw new Error('Document text and user role are required for analysis.');
-  }
-
-  const language = languageForAI[languageCode];
-
-  // Split the document into clauses for explanation.
-  const clauses = splitIntoClauses(documentText);
-  if (clauses.length === 0) {
-    // This now throws a more specific error.
     throw new Error(
-      'Could not find any paragraphs to analyze. Please ensure your document is plain text and has distinct paragraphs separated by blank lines.'
+      error.message || 'An unknown error occurred while suggesting a role.'
     );
   }
-
-  try {
-    // Run AI analysis flows sequentially to avoid rate-limiting.
-    const risk = await assessDocumentRisk({ documentText, userRole, language });
-    const keyNumbersResult = await extractKeyNumbers({ documentText, language });
-    const explainedClauses = await explainClauses({ clauses, userRole, language });
-    const faqResult = await generateFaq({ documentText, userRole, language });
-    const missingClausesResult = await detectMissingClauses({documentText, userRole, language});
-
-    // This check is necessary because the `explainClauses` flow can sometimes return
-    // an empty or invalid response, even if it doesn't throw an error.
-    // If it fails, we assume the AI couldn't handle the content.
-    if (!explainedClauses || explainedClauses.length === 0) {
-      throw new Error('The AI failed to provide clause explanations. The document might be too short, in an unsupported format, or contain content the AI cannot process.');
-    }
-
-    return {
-      riskAssessment: risk,
-      keyNumbers: keyNumbersResult.keyNumbers,
-      clauseBreakdown: explainedClauses,
-      faq: faqResult,
-      missingClauses: missingClausesResult
-    };
-  } catch (error: any) {
-    console.error('Error during AI analysis:', error);
-    
-    // Provide a more user-friendly error message that includes the specific error.
-    throw new Error(error.message || 'An unexpected error occurred during the AI analysis.');
-  }
 }
+
+// Helper to get language name for AI
+const getLanguageForAI = (languageCode: keyof typeof supportedLanguages) => languageForAI[languageCode];
+
+// Individual server actions for each analysis step
+export async function getRisk(input: AssessDocumentRiskInput): Promise<AssessDocumentRiskOutput> {
+    try {
+        return await assessDocumentRisk(input);
+    } catch (error: any) {
+        console.error('Error in getRisk:', error);
+        throw new Error(error.message || 'Failed to assess document risk.');
+    }
+}
+
+export async function getKeyNumbers(input: ExtractKeyNumbersInput): Promise<ExtractKeyNumbersOutput> {
+    try {
+        return await extractKeyNumbers(input);
+    } catch (error: any) {
+        console.error('Error in getKeyNumbers:', error);
+        throw new Error(error.message || 'Failed to extract key numbers.');
+    }
+}
+
+export async function getExplainedClauses(documentText: string, userRole: string, languageCode: keyof typeof supportedLanguages): Promise<ExplainClausesOutput> {
+    try {
+        const clauses = splitIntoClauses(documentText);
+        if (clauses.length === 0) {
+            throw new Error('Could not find any paragraphs to analyze. Please ensure your document is plain text and has distinct paragraphs separated by blank lines.');
+        }
+        const language = getLanguageForAI(languageCode);
+        const explainedClauses = await explainClauses({ clauses, userRole, language });
+        if (!explainedClauses || explainedClauses.length === 0) {
+            throw new Error('The AI failed to provide clause explanations. The document might be too short, in an unsupported format, or contain content the AI cannot process.');
+        }
+        return explainedClauses;
+    } catch (error: any) {
+        console.error('Error in getExplainedClauses:', error);
+        throw new Error(error.message || 'Failed to explain clauses.');
+    }
+}
+
+export async function getFaq(input: GenerateFaqInput): Promise<GenerateFaqOutput> {
+    try {
+        return await generateFaq(input);
+    } catch (error: any) {
+        console.error('Error in getFaq:', error);
+        throw new Error(error.message || 'Failed to generate FAQ.');
+    }
+}
+
+export async function getMissingClauses(input: DetectMissingClausesInput): Promise<DetectMissingClausesOutput> {
+    try {
+        return await detectMissingClauses(input);
+    } catch (error: any) {
+        console.error('Error in getMissingClauses:', error);
+        throw new Error(error.message || 'Failed to detect missing clauses.');
+    }
+}
+
 
 /**
  * Handles a single turn in the conversational chat about the document.
@@ -114,13 +133,15 @@ export async function analyzeDocument(
  * @returns A promise that resolves to the AI's answer.
  */
 export async function getChatResponse(
-  input: Omit<ChatAboutDocumentInput, 'language'> & { languageCode: keyof typeof supportedLanguages }
+  input: Omit<ChatAboutDocumentInput, 'language'> & {
+    languageCode: keyof typeof supportedLanguages;
+  }
 ): Promise<string> {
   if (!input.documentText || !input.question) {
     throw new Error('Document text and a question are required.');
   }
 
-  const language = languageForAI[input.languageCode];
+  const language = getLanguageForAI(input.languageCode);
 
   try {
     const { answer } = await chatAboutDocument({
@@ -130,6 +151,9 @@ export async function getChatResponse(
     return answer;
   } catch (error: any) {
     console.error('Error getting chat response:', error);
-    throw new Error(error.message || 'Sorry, I encountered an unknown error while trying to answer.');
+    throw new Error(
+      error.message ||
+        'Sorry, I encountered an unknown error while trying to answer.'
+    );
   }
 }

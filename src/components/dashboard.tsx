@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/lib/firebase/auth-context';
 import {
   AlertCircle,
@@ -14,7 +14,14 @@ import {
   MessageSquarePlus,
 } from 'lucide-react';
 import type { AnalysisResult, LanguageCode } from '@/lib/types';
-import { analyzeDocument, suggestRole } from '@/app/actions';
+import {
+  suggestRole,
+  getRisk,
+  getKeyNumbers,
+  getExplainedClauses,
+  getFaq,
+  getMissingClauses,
+} from '@/app/actions';
 import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -43,8 +50,22 @@ import { LanguageSelector } from './language-selector';
 import { useTranslation } from '@/lib/translations';
 import ChatInterface from './chat-interface';
 import MissingClauses from './missing-clauses';
+import { Skeleton } from './ui/skeleton';
 
-type Status = 'idle' | 'suggesting_role' | 'processing' | 'success' | 'error';
+type Status =
+  | 'idle'
+  | 'suggesting_role'
+  | 'processing'
+  | 'success'
+  | 'error';
+type AnalysisStatus =
+  | 'idle'
+  | 'risk'
+  | 'keyNumbers'
+  | 'clauses'
+  | 'faq'
+  | 'missing'
+  | 'done';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -53,14 +74,14 @@ export default function Dashboard() {
   const t = useTranslation(language);
 
   const [status, setStatus] = useState<Status>('idle');
+  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>('idle');
   const [file, setFile] = useState<File | null>(null);
   const [documentText, setDocumentText] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(
-    null
+  const [analysisResult, setAnalysisResult] = useState<Partial<AnalysisResult>>(
+    {}
   );
   const [error, setError] = useState<string>('');
-  const [currentStepMessage, setCurrentStepMessage] = useState<string>('');
 
   const [suggestedRole, setSuggestedRole] = useState('');
   const [selectedRoleOption, setSelectedRoleOption] = useState('');
@@ -69,58 +90,54 @@ export default function Dashboard() {
   const userRole = useMemo(() => {
     return selectedRoleOption === 'other' ? customRole : selectedRoleOption;
   }, [selectedRoleOption, customRole]);
-  
-  const LOADING_MESSAGES = useMemo(() => [
-      t('analyzing_risk'),
-      t('extracting_key_numbers'),
-      t('breaking_down_clauses'),
-      t('generating_faqs'),
-      t('checking_for_missing_clauses'),
-      t('compiling_report'),
-  ], [t]);
-
 
   const canAnalyze = useMemo(() => file && userRole, [file, userRole]);
 
-  const handleFileChange = useCallback(async (selectedFile: File | null) => {
-    if (selectedFile) {
-      if (selectedFile.type === 'application/pdf' || selectedFile.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || selectedFile.type.startsWith('text/')) {
-        setFile(selectedFile);
-        setStatus('suggesting_role');
-        setSuggestedRole('');
-        setSelectedRoleOption('');
-        setCustomRole('');
-        try {
-          const fileText = await selectedFile.text();
-          setDocumentText(fileText); // Save document text
-          setCurrentStepMessage(t('suggesting_role'));
-          const role = await suggestRole(fileText);
-          setSuggestedRole(role);
-          setSelectedRoleOption(role);
-        } catch (e) {
-            const errorMessage = e instanceof Error ? e.message : 'Could not suggest a role.';
+  const handleFileChange = useCallback(
+    async (selectedFile: File | null) => {
+      if (selectedFile) {
+        if (
+          selectedFile.type === 'application/pdf' ||
+          selectedFile.type ===
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+          selectedFile.type.startsWith('text/')
+        ) {
+          setFile(selectedFile);
+          setStatus('suggesting_role');
+          setSuggestedRole('');
+          setSelectedRoleOption('');
+          setCustomRole('');
+          try {
+            const fileText = await selectedFile.text();
+            setDocumentText(fileText); // Save document text
+            const role = await suggestRole(fileText);
+            setSuggestedRole(role);
+            setSelectedRoleOption(role);
+          } catch (e) {
+            const errorMessage =
+              e instanceof Error ? e.message : 'Could not suggest a role.';
             toast({
               variant: 'destructive',
               title: t('role_suggestion_failed'),
               description: errorMessage,
             });
             // Fallback to allow user to enter role manually
-            setSuggestedRole('Analyst'); 
+            setSuggestedRole('Analyst');
             setSelectedRoleOption('other');
-        } finally {
+          } finally {
             setStatus('idle');
-            setCurrentStepMessage('');
+          }
+        } else {
+          toast({
+            variant: 'destructive',
+            title: t('unsupported_file_type_title'),
+            description: t('unsupported_file_type_description'),
+          });
         }
-      } else {
-        toast({
-          variant: 'destructive',
-          title: t('unsupported_file_type_title'),
-          description: t('unsupported_file_type_description'),
-        });
       }
-    }
-  }, [toast, t]);
-
+    },
+    [toast, t]
+  );
 
   const handleDragEvents = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -131,12 +148,12 @@ export default function Dashboard() {
     handleDragEvents(e);
     setIsDragging(true);
   };
-  
+
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
     handleDragEvents(e);
     setIsDragging(false);
   };
-  
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     handleDragEvents(e);
     setIsDragging(false);
@@ -145,35 +162,74 @@ export default function Dashboard() {
     }
   };
 
-  const runAnalysisWithProgress = async () => {
-    if (!documentText) throw new Error("File content is not available.");
-
-    for (const message of LOADING_MESSAGES) {
-      setCurrentStepMessage(message);
-      // This short delay allows React to re-render with the new message
-      // before the main thread is blocked by the next (potential) step.
-      await new Promise(resolve => setTimeout(resolve, 50)); 
-    }
-    
-    // The final step is the actual long-running analysis call
-    const result = await analyzeDocument(documentText, userRole, language as LanguageCode);
-    return result;
-  }
-
   const handleAnalysis = async () => {
-    if (!canAnalyze) return;
+    if (!canAnalyze || !documentText) return;
 
     setStatus('processing');
     setError('');
-    setAnalysisResult(null);
+    setAnalysisResult({});
+    setAnalysisStatus('idle');
 
     try {
-      // Use the new wrapper function to show progress
-      const result = await runAnalysisWithProgress();
-      setAnalysisResult(result);
+      const commonInput = {
+        documentText,
+        userRole,
+        language: language as LanguageCode,
+      };
+
+      setAnalysisStatus('risk');
+      const risk = await getRisk({
+        documentText: commonInput.documentText,
+        userRole: commonInput.userRole,
+        language: t.languageName,
+      });
+      setAnalysisResult((prev) => ({ ...prev, riskAssessment: risk }));
+
+      setAnalysisStatus('keyNumbers');
+      const keyNumbersResult = await getKeyNumbers({
+        documentText: commonInput.documentText,
+        language: t.languageName,
+      });
+      setAnalysisResult((prev) => ({
+        ...prev,
+        keyNumbers: keyNumbersResult.keyNumbers,
+      }));
+      
+      setAnalysisStatus('missing');
+      const missingClausesResult = await getMissingClauses({
+        documentText: commonInput.documentText,
+        userRole: commonInput.userRole,
+        language: t.languageName,
+      });
+      setAnalysisResult((prev) => ({
+        ...prev,
+        missingClauses: missingClausesResult,
+      }));
+
+      setAnalysisStatus('clauses');
+      const explainedClauses = await getExplainedClauses(
+        commonInput.documentText,
+        commonInput.userRole,
+        language as LanguageCode
+      );
+      setAnalysisResult((prev) => ({
+        ...prev,
+        clauseBreakdown: explainedClauses,
+      }));
+
+      setAnalysisStatus('faq');
+      const faqResult = await getFaq({
+        documentText: commonInput.documentText,
+        userRole: commonInput.userRole,
+        language: t.languageName,
+      });
+      setAnalysisResult((prev) => ({ ...prev, faq: faqResult }));
+
+      setAnalysisStatus('done');
       setStatus('success');
     } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
+      const errorMessage =
+        e instanceof Error ? e.message : 'An unknown error occurred.';
       setError(errorMessage);
       setStatus('error');
       toast({
@@ -181,24 +237,47 @@ export default function Dashboard() {
         title: t('analysis_error'),
         description: errorMessage,
       });
-    } finally {
-      setCurrentStepMessage('');
     }
   };
 
   const handleReset = () => {
     setStatus('idle');
+    setAnalysisStatus('idle');
     setFile(null);
     setDocumentText('');
-    setAnalysisResult(null);
+    setAnalysisResult({});
     setError('');
     setSuggestedRole('');
     setSelectedRoleOption('');
     setCustomRole('');
-    setCurrentStepMessage('');
   };
 
   const isProcessing = status === 'processing' || status === 'suggesting_role';
+
+  const analysisStepMessages: Record<AnalysisStatus, string> = {
+    idle: t('starting_analysis'),
+    risk: t('analyzing_risk'),
+    keyNumbers: t('extracting_key_numbers'),
+    missing: t('checking_for_missing_clauses'),
+    clauses: t('breaking_down_clauses'),
+    faq: t('generating_faqs'),
+    done: t('compiling_report'),
+  };
+
+  const AnalysisSkeleton = ({ title, description, lines = 3 }: { title: string; description: string; lines?: number }) => (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-2xl">{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className={`h-8 w-1/${lines > 1 ? '3' : '2'}`} />
+        {[...Array(lines-1)].map((_, i) => (
+          <Skeleton key={i} className="h-4 w-full" />
+        ))}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -214,7 +293,10 @@ export default function Dashboard() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.photoURL ?? ''} alt={user?.displayName ?? 'User'} />
+                  <AvatarImage
+                    src={user?.photoURL ?? ''}
+                    alt={user?.displayName ?? 'User'}
+                  />
                   <AvatarFallback>
                     {user?.displayName?.charAt(0).toUpperCase()}
                   </AvatarFallback>
@@ -225,10 +307,10 @@ export default function Dashboard() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild className="cursor-pointer">
-                  <Link href="/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>{t('settings')}</span>
-                  </Link>
+                <Link href="/settings">
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>{t('settings')}</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={signOut} className="cursor-pointer">
@@ -242,16 +324,18 @@ export default function Dashboard() {
 
       <main className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="mx-auto max-w-4xl space-y-8">
-          <div className="text-center space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-              {t('legal_document_analysis')}
-            </h1>
-            <p className="text-lg text-muted-foreground">
-              {t('upload_and_get_insights')}
-            </p>
-          </div>
+          {status !== 'processing' && status !== 'success' && (
+            <div className="text-center space-y-4">
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                {t('legal_document_analysis')}
+              </h1>
+              <p className="text-lg text-muted-foreground">
+                {t('upload_and_get_insights')}
+              </p>
+            </div>
+          )}
 
-          {status !== 'success' && (
+          {status !== 'processing' && status !== 'success' && (
             <Card>
               <CardContent className="space-y-6 p-6">
                 <div
@@ -262,28 +346,39 @@ export default function Dashboard() {
                   onDragLeave={handleDragLeave}
                   onDragOver={handleDragEvents}
                   onDrop={handleDrop}
-                  onClick={() => document.getElementById('file-upload')?.click()}
+                  onClick={() =>
+                    document.getElementById('file-upload')?.click()
+                  }
                 >
                   <input
                     id="file-upload"
                     type="file"
                     className="hidden"
-                    onChange={(e) => handleFileChange(e.target.files?.[0] ?? null)}
+                    onChange={(e) =>
+                      handleFileChange(e.target.files?.[0] ?? null)
+                    }
                     accept=".pdf,.docx,.txt"
                     disabled={isProcessing}
                   />
-                  {isProcessing ? (
+                  {status === 'suggesting_role' ? (
                     <div className="text-center">
                       <LoaderCircle className="mx-auto h-12 w-12 animate-spin text-primary" />
                       <p className="mt-4 text-lg font-medium">
-                        {currentStepMessage}
+                        {t('suggesting_role')}
                       </p>
                     </div>
                   ) : file ? (
                     <div className="text-center text-primary">
                       <FileText className="mx-auto h-12 w-12" />
                       <p className="mt-2 font-semibold">{file.name}</p>
-                      <Button variant="link" size="sm" onClick={(e) => { e.stopPropagation(); handleReset(); }}>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleReset();
+                        }}
+                      >
                         {t('remove_file')}
                       </Button>
                     </div>
@@ -298,31 +393,42 @@ export default function Dashboard() {
                     </div>
                   )}
                 </div>
-                
+
                 {file && !isProcessing && (
-                    <div className="space-y-4">
-                        <label className="text-sm font-medium">{t('confirm_your_role')}</label>
-                        <RadioGroup value={selectedRoleOption} onValueChange={setSelectedRoleOption} disabled={isProcessing}>
-                            {suggestedRole && suggestedRole !== 'Other' && (
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value={suggestedRole} id={`role-${suggestedRole}`} />
-                                    <Label htmlFor={`role-${suggestedRole}`}>{suggestedRole} {t('ai_suggestion')}</Label>
-                                </div>
-                            )}
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="other" id="role-other" />
-                                <Label htmlFor="role-other">{t('other')}</Label>
-                            </div>
-                        </RadioGroup>
-                        {selectedRoleOption === 'other' && (
-                            <Input 
-                                placeholder={t('specify_your_role')}
-                                value={customRole}
-                                onChange={(e) => setCustomRole(e.target.value)}
-                                disabled={isProcessing}
-                            />
-                        )}
-                    </div>
+                  <div className="space-y-4">
+                    <label className="text-sm font-medium">
+                      {t('confirm_your_role')}
+                    </label>
+                    <RadioGroup
+                      value={selectedRoleOption}
+                      onValueChange={setSelectedRoleOption}
+                      disabled={isProcessing}
+                    >
+                      {suggestedRole && suggestedRole !== 'Other' && (
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem
+                            value={suggestedRole}
+                            id={`role-${suggestedRole}`}
+                          />
+                          <Label htmlFor={`role-${suggestedRole}`}>
+                            {suggestedRole} {t('ai_suggestion')}
+                          </Label>
+                        </div>
+                      )}
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="other" id="role-other" />
+                        <Label htmlFor="role-other">{t('other')}</Label>
+                      </div>
+                    </RadioGroup>
+                    {selectedRoleOption === 'other' && (
+                      <Input
+                        placeholder={t('specify_your_role')}
+                        value={customRole}
+                        onChange={(e) => setCustomRole(e.target.value)}
+                        disabled={isProcessing}
+                      />
+                    )}
+                  </div>
                 )}
 
                 <Button
@@ -331,52 +437,98 @@ export default function Dashboard() {
                   className="w-full"
                   size="lg"
                 >
-                  {status === 'processing' ? t('analyzing') : t('analyze_document')}
+                  {t('analyze_document')}
                 </Button>
               </CardContent>
             </Card>
           )}
-          
+
           {status === 'error' && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>{t('analysis_error')}</AlertTitle>
               <AlertDescription>
-                {error} {t('error_message_prefix')}
+                {error} {t('try_again_or_contact_support')}
               </AlertDescription>
             </Alert>
           )}
 
-          {status === 'success' && analysisResult && (
+          {(status === 'processing' || status === 'success') && (
             <div className="space-y-8">
               <div className="flex flex-col items-start justify-between gap-4 rounded-lg border bg-card p-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-3">
-                   <FileText className="h-8 w-8 text-primary" />
-                   <div>
-                     <p className="font-bold">{file?.name}</p>
-                     <p className="text-sm text-muted-foreground">{t('role')}: {userRole}</p>
-                   </div>
+                  <FileText className="h-8 w-8 text-primary" />
+                  <div>
+                    <p className="font-bold">{file?.name}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {t('role')}: {userRole}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-2">
-                  <ChatInterface documentText={documentText} userRole={userRole}>
-                    <Button variant="outline">
+                  <ChatInterface
+                    documentText={documentText}
+                    userRole={userRole}
+                  >
+                    <Button
+                      variant="outline"
+                      disabled={status !== 'success'}
+                    >
                       <MessageSquarePlus className="mr-2 h-4 w-4" />
                       {t('ask_the_ai')}
                     </Button>
                   </ChatInterface>
-                  <Button onClick={handleReset} variant="default">{t('analyze_new_document')}</Button>
+                  <Button onClick={handleReset} variant="default">
+                    {t('analyze_new_document')}
+                  </Button>
                 </div>
               </div>
+              
+              {isProcessing && analysisStatus !== 'idle' && (
+                <div className='flex items-center justify-center gap-2 p-4 text-muted-foreground'>
+                  <LoaderCircle className="h-5 w-5 animate-spin" />
+                  <span>{analysisStepMessages[analysisStatus]}</span>
+                </div>
+              )}
 
-              <RiskMeter
-                riskScore={analysisResult.riskAssessment.riskScore}
-                riskLevel={analysisResult.riskAssessment.riskLevel}
-                summary={analysisResult.riskAssessment.summary}
-              />
-              <MissingClauses missingClauses={analysisResult.missingClauses} />
-              <KeyNumbers keyNumbers={analysisResult.keyNumbers} />
-              <ClauseBreakdown clauses={analysisResult.clauseBreakdown} />
-              <FaqSection faqData={analysisResult.faq} />
+              {analysisResult.riskAssessment ? (
+                <RiskMeter
+                  riskScore={analysisResult.riskAssessment.riskScore}
+                  riskLevel={analysisResult.riskAssessment.riskLevel}
+                  summary={analysisResult.riskAssessment.summary}
+                />
+              ) : (
+                isProcessing && analysisStatus === 'risk' &&
+                <AnalysisSkeleton title={t('risk_meter')} description={t('risk_assessment_description')} />
+              )}
+              
+              {analysisResult.missingClauses ? (
+                <MissingClauses missingClauses={analysisResult.missingClauses} />
+              ) : (
+                isProcessing && analysisStatus === 'missing' &&
+                <AnalysisSkeleton title={t('missing_clause_detector')} description={t('missing_clause_description')} />
+              )}
+
+              {analysisResult.keyNumbers ? (
+                <KeyNumbers keyNumbers={analysisResult.keyNumbers} />
+              ) : (
+                isProcessing && analysisStatus === 'keyNumbers' &&
+                <AnalysisSkeleton title={t('key_numbers_dates')} description={t('key_numbers_description')} />
+              )}
+
+              {analysisResult.clauseBreakdown ? (
+                <ClauseBreakdown clauses={analysisResult.clauseBreakdown} />
+              ) : (
+                isProcessing && analysisStatus === 'clauses' &&
+                <AnalysisSkeleton title={t('clause_breakdown')} description={t('clause_breakdown_description')} lines={5} />
+              )}
+
+              {analysisResult.faq ? (
+                <FaqSection faqData={analysisResult.faq} />
+              ) : (
+                isProcessing && analysisStatus === 'faq' &&
+                <AnalysisSkeleton title={t('ai_generated_faqs')} description={t('faq_description')} lines={5} />
+              )}
             </div>
           )}
         </div>
@@ -384,5 +536,3 @@ export default function Dashboard() {
     </div>
   );
 }
-
-    
