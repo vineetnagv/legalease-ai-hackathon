@@ -23,10 +23,19 @@ This project was generated in Firebase Studio.
 ### 2. Set up Firebase
 
 1.  Create a new Firebase project at [console.firebase.google.com](https://console.firebase.google.com/).
-2.  In your project, go to **Authentication** and enable the **Google** sign-in provider.
-3.  Go to **Project Settings** > **General** and find your web app's Firebase configuration.
-4.  Create a `.env.local` file in the root of the project by copying `.env.local.example` (if it exists) or creating it from scratch.
-5.  Populate `.env.local` with your Firebase configuration keys:
+2.  Go to **Project Settings** (click the gear icon ⚙️ next to "Project Overview").
+3.  Under the **General** tab, scroll down to "Your apps".
+4.  If you don't have a web app, create one by clicking the `</>` (Web) icon.
+5.  Find your web app's Firebase configuration snippet. It will look like this:
+    ```javascript
+    const firebaseConfig = {
+      apiKey: "AIza...",
+      authDomain: "your-project-id.firebaseapp.com",
+      // ... and so on
+    };
+    ```
+6.  In your project's code, create a new file named `.env` in the root directory.
+7.  Copy and paste the following content into your new `.env` file, replacing the placeholder values with the actual keys from your Firebase config snippet:
 
     ```
     NEXT_PUBLIC_FIREBASE_API_KEY="your-api-key"
@@ -36,6 +45,7 @@ This project was generated in Firebase Studio.
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your-messaging-sender-id"
     NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
     ```
+8. In your Firebase project, go to **Authentication** (from the left menu), select the **Sign-in method** tab, and enable the **Google** provider.
 
 ### 3. Install Dependencies
 
@@ -53,7 +63,7 @@ Start the Next.js development server:
 npm run dev
 ```
 
-The application will be available at [http://localhost:9002](http://localhost:9002).
+The application will be available at [http://localhost:9002](http://localhost:9002). **You may need to restart the development server after updating the `.env` file for the changes to take effect.**
 
 ## Tech Stack
 
