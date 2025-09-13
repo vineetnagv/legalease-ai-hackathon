@@ -46,6 +46,7 @@ This project was generated in Firebase Studio.
     NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
     ```
 8. In your Firebase project, go to **Authentication** (from the left menu), select the **Sign-in method** tab, and enable the **Google** provider.
+9. In the **Authentication** section, select the **Settings** tab. Under **Authorized domains**, click **Add domain** and enter `localhost`. This is required for local development.
 
 ### 3. Install Dependencies
 
