@@ -49,6 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signInWithPopup(auth, provider);
     } catch (error) {
       console.error('Error signing in with Google:', error);
+      // Re-throw the error so the UI can catch it and display a message
       throw error;
     }
   };
@@ -93,5 +94,3 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
-
-    
