@@ -13,7 +13,7 @@ import {googleAI} from '@genkit-ai/googleai';
  */
 export const analyzerAgent = genkit({
   plugins: [googleAI({apiKey: process.env.GEMINI_API_KEY_ANALYZER})],
-  model: 'googleai/gemini-2.5-flash',
+  model: 'gemini-1.5-flash',
 });
 
 /**
@@ -22,7 +22,7 @@ export const analyzerAgent = genkit({
  */
 export const verifierAgent = genkit({
   plugins: [googleAI({apiKey: process.env.GEMINI_API_KEY_VERIFIER})],
-  model: 'googleai/gemini-2.5-flash',
+  model: 'gemini-1.5-flash',
 });
 
 /**
@@ -31,7 +31,7 @@ export const verifierAgent = genkit({
  */
 export const chatAgent = genkit({
     plugins: [googleAI({apiKey: process.env.GEMINI_API_KEY_CHAT})],
-    model: 'googleai/gemini-2.5-flash',
+    model: 'gemini-1.5-flash',
 });
 
 /**
@@ -40,5 +40,5 @@ export const chatAgent = genkit({
  */
 export const translatorAgent = genkit({
     plugins: [googleAI({apiKey: process.env.GEMINI_API_KEY_TRANSLATOR})],
-    model: 'googleai/gemini-2.5-flash',
+    model: 'gemini-1.5-flash',
 });
