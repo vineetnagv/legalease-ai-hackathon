@@ -1,20 +1,4 @@
 
-import type {
-  AssessDocumentRiskOutput,
-  DetectMissingClausesOutput,
-  ExplainClausesOutput,
-  ExtractKeyNumbersOutput,
-  GenerateFaqOutput
-} from '@/lib/ai-types';
-
-export type AnalysisResult = {
-  riskAssessment: AssessDocumentRiskOutput;
-  keyNumbers: ExtractKeyNumbersOutput['keyNumbers'];
-  clauseBreakdown: ExplainClausesOutput;
-  faq: GenerateFaqOutput;
-  missingClauses: DetectMissingClausesOutput;
-};
-
 export const supportedLanguages = {
   en: 'English',
   hi: 'हिंदी (Hindi)',

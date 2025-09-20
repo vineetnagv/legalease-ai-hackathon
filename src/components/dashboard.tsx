@@ -4,24 +4,14 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { useAuth } from '@/lib/firebase/auth-context';
 import {
-  AlertCircle,
   ChevronDown,
   FileText,
   LoaderCircle,
   LogOut,
   UploadCloud,
   Settings,
-  MessageSquarePlus,
 } from 'lucide-react';
-import type { AnalysisResult, LanguageCode } from '@/lib/types';
-import {
-  suggestRole,
-  getRisk,
-  getKeyNumbers,
-  getExplainedClauses,
-  getFaq,
-  getMissingClauses,
-} from '@/app/actions';
+import { suggestRole } from '@/app/actions';
 import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -36,36 +26,19 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/icons';
-import RiskMeter from './risk-meter';
-import KeyNumbers from './key-numbers';
-import ClauseBreakdown from './clause-breakdown';
-import FaqSection from './faq-section';
 import { ThemeToggle } from './theme-toggle';
 import { useLanguage } from '@/contexts/language-context';
 import { LanguageSelector } from './language-selector';
 import { useTranslation } from '@/lib/translations';
-import ChatInterface from './chat-interface';
-import MissingClauses from './missing-clauses';
-import { Skeleton } from './ui/skeleton';
 
 type Status =
   | 'idle'
   | 'suggesting_role'
-  | 'processing'
-  | 'success'
+  | 'ready'
   | 'error';
-type AnalysisStatus =
-  | 'idle'
-  | 'risk'
-  | 'keyNumbers'
-  | 'clauses'
-  | 'faq'
-  | 'missing'
-  | 'done';
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
@@ -74,15 +47,9 @@ export default function Dashboard() {
   const t = useTranslation(language);
 
   const [status, setStatus] = useState<Status>('idle');
-  const [analysisStatus, setAnalysisStatus] = useState<AnalysisStatus>('idle');
   const [file, setFile] = useState<File | null>(null);
-  const [documentText, setDocumentText] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<Partial<AnalysisResult>>(
-    {}
-  );
-  const [error, setError] = useState<string>('');
-
+  
   const [suggestedRole, setSuggestedRole] = useState('');
   const [selectedRoleOption, setSelectedRoleOption] = useState('');
   const [customRole, setCustomRole] = useState('');
@@ -97,9 +64,6 @@ export default function Dashboard() {
     async (selectedFile: File | null) => {
       if (selectedFile) {
         if (
-          selectedFile.type === 'application/pdf' ||
-          selectedFile.type ===
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
           selectedFile.type.startsWith('text/')
         ) {
           setFile(selectedFile);
@@ -109,10 +73,10 @@ export default function Dashboard() {
           setCustomRole('');
           try {
             const fileText = await selectedFile.text();
-            setDocumentText(fileText); // Save document text
             const role = await suggestRole(fileText);
             setSuggestedRole(role);
             setSelectedRoleOption(role);
+            setStatus('ready');
           } catch (e) {
             const errorMessage =
               e instanceof Error ? e.message : 'Could not suggest a role.';
@@ -121,10 +85,6 @@ export default function Dashboard() {
               title: t('role_suggestion_failed'),
               description: errorMessage,
             });
-            // Fallback to allow user to enter role manually
-            setSuggestedRole('Analyst');
-            setSelectedRoleOption('other');
-          } finally {
             setStatus('idle');
           }
         } else {
@@ -162,122 +122,17 @@ export default function Dashboard() {
     }
   };
 
-  const handleAnalysis = async () => {
-    if (!canAnalyze || !documentText) return;
-
-    setStatus('processing');
-    setError('');
-    setAnalysisResult({});
-    setAnalysisStatus('idle');
-
-    try {
-      const commonInput = {
-        documentText,
-        userRole,
-        language: language as LanguageCode,
-      };
-
-      setAnalysisStatus('risk');
-      const risk = await getRisk({
-        documentText: commonInput.documentText,
-        userRole: commonInput.userRole,
-        language: t.languageName,
-      });
-      setAnalysisResult((prev) => ({ ...prev, riskAssessment: risk }));
-
-      setAnalysisStatus('keyNumbers');
-      const keyNumbersResult = await getKeyNumbers({
-        documentText: commonInput.documentText,
-        language: t.languageName,
-      });
-      setAnalysisResult((prev) => ({
-        ...prev,
-        keyNumbers: keyNumbersResult.keyNumbers,
-      }));
-      
-      setAnalysisStatus('missing');
-      const missingClausesResult = await getMissingClauses({
-        documentText: commonInput.documentText,
-        userRole: commonInput.userRole,
-        language: t.languageName,
-      });
-      setAnalysisResult((prev) => ({
-        ...prev,
-        missingClauses: missingClausesResult,
-      }));
-
-      setAnalysisStatus('clauses');
-      const explainedClauses = await getExplainedClauses(
-        commonInput.documentText,
-        commonInput.userRole,
-        language as LanguageCode
-      );
-      setAnalysisResult((prev) => ({
-        ...prev,
-        clauseBreakdown: explainedClauses,
-      }));
-
-      setAnalysisStatus('faq');
-      const faqResult = await getFaq({
-        documentText: commonInput.documentText,
-        userRole: commonInput.userRole,
-        language: t.languageName,
-      });
-      setAnalysisResult((prev) => ({ ...prev, faq: faqResult }));
-
-      setAnalysisStatus('done');
-      setStatus('success');
-    } catch (e: unknown) {
-      const errorMessage =
-        e instanceof Error ? e.message : 'An unknown error occurred.';
-      setError(errorMessage);
-      setStatus('error');
-      toast({
-        variant: 'destructive',
-        title: t('analysis_error'),
-        description: errorMessage,
-      });
-    }
-  };
 
   const handleReset = () => {
     setStatus('idle');
-    setAnalysisStatus('idle');
     setFile(null);
-    setDocumentText('');
-    setAnalysisResult({});
-    setError('');
     setSuggestedRole('');
     setSelectedRoleOption('');
     setCustomRole('');
   };
 
-  const isProcessing = status === 'processing' || status === 'suggesting_role';
+  const isProcessing = status === 'suggesting_role';
 
-  const analysisStepMessages: Record<AnalysisStatus, string> = {
-    idle: t('starting_analysis'),
-    risk: t('analyzing_risk'),
-    keyNumbers: t('extracting_key_numbers'),
-    missing: t('checking_for_missing_clauses'),
-    clauses: t('breaking_down_clauses'),
-    faq: t('generating_faqs'),
-    done: t('compiling_report'),
-  };
-
-  const AnalysisSkeleton = ({ title, description, lines = 3 }: { title: string; description: string; lines?: number }) => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl">{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Skeleton className={`h-8 w-1/${lines > 1 ? '3' : '2'}`} />
-        {[...Array(lines-1)].map((_, i) => (
-          <Skeleton key={i} className="h-4 w-full" />
-        ))}
-      </CardContent>
-    </Card>
-  );
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -324,7 +179,7 @@ export default function Dashboard() {
 
       <main className="flex-1 p-4 sm:p-6 md:p-8">
         <div className="mx-auto max-w-4xl space-y-8">
-          {status !== 'processing' && status !== 'success' && (
+          
             <div className="text-center space-y-4">
               <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
                 {t('legal_document_analysis')}
@@ -333,9 +188,7 @@ export default function Dashboard() {
                 {t('upload_and_get_insights')}
               </p>
             </div>
-          )}
-
-          {status !== 'processing' && status !== 'success' && (
+          
             <Card>
               <CardContent className="space-y-6 p-6">
                 <div
@@ -357,7 +210,7 @@ export default function Dashboard() {
                     onChange={(e) =>
                       handleFileChange(e.target.files?.[0] ?? null)
                     }
-                    accept=".pdf,.docx,.txt"
+                    accept=".txt"
                     disabled={isProcessing}
                   />
                   {status === 'suggesting_role' ? (
@@ -432,7 +285,7 @@ export default function Dashboard() {
                 )}
 
                 <Button
-                  onClick={handleAnalysis}
+                  onClick={() => alert("Analysis feature coming soon!")}
                   disabled={!canAnalyze || isProcessing}
                   className="w-full"
                   size="lg"
@@ -441,96 +294,6 @@ export default function Dashboard() {
                 </Button>
               </CardContent>
             </Card>
-          )}
-
-          {status === 'error' && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>{t('analysis_error')}</AlertTitle>
-              <AlertDescription>
-                {error} {t('try_again_or_contact_support')}
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {(status === 'processing' || status === 'success') && (
-            <div className="space-y-8">
-              <div className="flex flex-col items-start justify-between gap-4 rounded-lg border bg-card p-4 sm:flex-row sm:items-center">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-8 w-8 text-primary" />
-                  <div>
-                    <p className="font-bold">{file?.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {t('role')}: {userRole}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <ChatInterface
-                    documentText={documentText}
-                    userRole={userRole}
-                  >
-                    <Button
-                      variant="outline"
-                      disabled={status !== 'success'}
-                    >
-                      <MessageSquarePlus className="mr-2 h-4 w-4" />
-                      {t('ask_the_ai')}
-                    </Button>
-                  </ChatInterface>
-                  <Button onClick={handleReset} variant="default">
-                    {t('analyze_new_document')}
-                  </Button>
-                </div>
-              </div>
-              
-              {isProcessing && analysisStatus !== 'idle' && (
-                <div className='flex items-center justify-center gap-2 p-4 text-muted-foreground'>
-                  <LoaderCircle className="h-5 w-5 animate-spin" />
-                  <span>{analysisStepMessages[analysisStatus]}</span>
-                </div>
-              )}
-
-              {analysisResult.riskAssessment ? (
-                <RiskMeter
-                  riskScore={analysisResult.riskAssessment.riskScore}
-                  riskLevel={analysisResult.riskAssessment.riskLevel}
-                  summary={analysisResult.riskAssessment.summary}
-                />
-              ) : (
-                isProcessing && analysisStatus === 'risk' &&
-                <AnalysisSkeleton title={t('risk_meter')} description={t('risk_assessment_description')} />
-              )}
-              
-              {analysisResult.missingClauses ? (
-                <MissingClauses missingClauses={analysisResult.missingClauses} />
-              ) : (
-                isProcessing && analysisStatus === 'missing' &&
-                <AnalysisSkeleton title={t('missing_clause_detector')} description={t('missing_clause_description')} />
-              )}
-
-              {analysisResult.keyNumbers ? (
-                <KeyNumbers keyNumbers={analysisResult.keyNumbers} />
-              ) : (
-                isProcessing && analysisStatus === 'keyNumbers' &&
-                <AnalysisSkeleton title={t('key_numbers_dates')} description={t('key_numbers_description')} />
-              )}
-
-              {analysisResult.clauseBreakdown ? (
-                <ClauseBreakdown clauses={analysisResult.clauseBreakdown} />
-              ) : (
-                isProcessing && analysisStatus === 'clauses' &&
-                <AnalysisSkeleton title={t('clause_breakdown')} description={t('clause_breakdown_description')} lines={5} />
-              )}
-
-              {analysisResult.faq ? (
-                <FaqSection faqData={analysisResult.faq} />
-              ) : (
-                isProcessing && analysisStatus === 'faq' &&
-                <AnalysisSkeleton title={t('ai_generated_faqs')} description={t('faq_description')} lines={5} />
-              )}
-            </div>
-          )}
         </div>
       </main>
     </div>
