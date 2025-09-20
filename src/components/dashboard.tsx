@@ -73,6 +73,19 @@ export default function Dashboard() {
           setCustomRole('');
           try {
             const fileText = await selectedFile.text();
+            
+            // Client-side validation to prevent sending empty/null text
+            if (!fileText || fileText.trim() === '') {
+              toast({
+                variant: 'destructive',
+                title: t('role_suggestion_failed'),
+                description: t('error_empty_document'),
+              });
+              setStatus('idle');
+              setFile(null); // Clear the invalid file
+              return;
+            }
+
             const role = await suggestRole(fileText);
             setSuggestedRole(role);
             setSelectedRoleOption(role);
