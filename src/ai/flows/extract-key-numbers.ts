@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,24 +9,13 @@
  * - ExtractKeyNumbersOutput - The return type for the extractKeynumbers function.
  */
 
-import { analyzerAgent as ai } from '@/ai/agents';
-import {z} from 'genkit';
-
-const ExtractKeyNumbersInputSchema = z.object({
-  documentText: z
-    .string()
-    .describe('The text content of the legal document to analyze.'),
-  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
-});
-export type ExtractKeyNumbersInput = z.infer<typeof ExtractKeyNumbersInputSchema>;
-
-const ExtractKeyNumbersOutputSchema = z.object({
-    keyNumbers: z.array(z.object({
-        key: z.string().describe("The name of the extracted value (e.g., 'Monthly Rent', 'Contract End Date')."),
-        value: z.string().describe("The extracted value from the document (e.g., '$2,000', '2026-12-31').")
-    })).describe("A list of key-value pairs extracted from the document.")
-});
-export type ExtractKeyNumbersOutput = z.infer<typeof ExtractKeyNumbersOutputSchema>;
+import { ai } from '@/ai/agents';
+import {
+  ExtractKeyNumbersInputSchema,
+  ExtractKeyNumbersOutputSchema,
+  type ExtractKeyNumbersInput,
+  type ExtractKeyNumbersOutput,
+} from '@/lib/ai-types';
 
 
 export async function extractKeyNumbers(input: ExtractKeyNumbersInput): Promise<ExtractKeyNumbersOutput> {

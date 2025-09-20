@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,25 +9,14 @@
  * - DetectMissingClausesOutput - The return type for the detectMissingClauses function.
  */
 
-import { analyzerAgent as ai } from '@/ai/agents';
-import {z} from 'genkit';
+import { ai } from '@/ai/agents';
+import {
+  DetectMissingClausesInputSchema,
+  DetectMissingClausesOutputSchema,
+  type DetectMissingClausesInput,
+  type DetectMissingClausesOutput,
+} from '@/lib/ai-types';
 
-const DetectMissingClausesInputSchema = z.object({
-  documentText: z.string().describe('The text content of the legal document.'),
-  userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).'),
-  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
-});
-export type DetectMissingClausesInput = z.infer<typeof DetectMissingClausesInputSchema>;
-
-
-const MissingClauseSchema = z.object({
-    clauseName: z.string().describe('The name of the missing clause (e.g., "Confidentiality").'),
-    description: z.string().describe('A brief explanation of what this clause typically covers.'),
-    risk: z.string().describe("The potential risk to the user due to the absence of this clause."),
-});
-
-const DetectMissingClausesOutputSchema = z.array(MissingClauseSchema).describe("An array of potentially missing clauses.");
-export type DetectMissingClausesOutput = z.infer<typeof DetectMissingClausesOutputSchema>;
 
 export async function detectMissingClauses(input: DetectMissingClausesInput): Promise<DetectMissingClausesOutput> {
   return detectMissingClausesFlow(input);

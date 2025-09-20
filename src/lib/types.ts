@@ -1,8 +1,11 @@
-import type { AssessDocumentRiskOutput } from '@/ai/flows/assess-document-risk';
-import type { DetectMissingClausesOutput } from '@/ai/flows/detect-missing-clauses';
-import type { ExplainClausesOutput } from '@/ai/flows/explain-clauses';
-import type { ExtractKeyNumbersOutput } from '@/ai/flows/extract-key-numbers';
-import type { GenerateFaqOutput } from '@/ai/flows/generate-faq';
+
+import type {
+  AssessDocumentRiskOutput,
+  DetectMissingClausesOutput,
+  ExplainClausesOutput,
+  ExtractKeyNumbersOutput,
+  GenerateFaqOutput
+} from '@/lib/ai-types';
 
 export type AnalysisResult = {
   riskAssessment: AssessDocumentRiskOutput;

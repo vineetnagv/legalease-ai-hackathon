@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,22 +9,14 @@
  * - AssessDocumentRiskOutput - The return type for the assessDocumentRisk function.
  */
 
-import { analyzerAgent as ai } from '@/ai/agents';
-import {z} from 'genkit';
+import { ai } from '@/ai/agents';
+import {
+  AssessDocumentRiskInputSchema,
+  AssessDocumentRiskOutputSchema,
+  type AssessDocumentRiskInput,
+  type AssessDocumentRiskOutput,
+} from '@/lib/ai-types';
 
-const AssessDocumentRiskInputSchema = z.object({
-  documentText: z.string().describe('The text content of the legal document.'),
-  userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).'),
-  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
-});
-export type AssessDocumentRiskInput = z.infer<typeof AssessDocumentRiskInputSchema>;
-
-const AssessDocumentRiskOutputSchema = z.object({
-  riskLevel: z.enum(['Low', 'Medium', 'High']).describe('The overall risk level of the document.'),
-  riskScore: z.number().describe('A numerical score representing the risk level (0-100).'),
-  summary: z.string().describe('A brief summary of the risks identified in the document.'),
-});
-export type AssessDocumentRiskOutput = z.infer<typeof AssessDocumentRiskOutputSchema>;
 
 export async function assessDocumentRisk(input: AssessDocumentRiskInput): Promise<AssessDocumentRiskOutput> {
   return assessDocumentRiskFlow(input);

@@ -1,8 +1,13 @@
 
 'use server';
 
-import { verifierAgent as ai } from '@/ai/agents';
-import { z } from 'genkit';
+import { ai } from '@/ai/agents';
+import {
+  VerifyBatchExplanationInputSchema,
+  VerifyBatchExplanationOutputSchema,
+  type VerifyBatchExplanationInput,
+  type VerifyBatchExplanationOutput,
+} from '@/lib/ai-types';
 
 /**
  * @fileOverview An AI agent that verifies if a batch of explanations are grounded in their source texts.
@@ -11,30 +16,6 @@ import { z } from 'genkit';
  * - VerifyBatchExplanationInput - Input for the batch verification function.
  * - VerifyBatchExplanationOutput - Output for the batch verification function.
  */
-
-// Schema for the input of the batch verifier flow
-const VerifyBatchExplanationInputSchema = z.object({
-  sourceClauses: z.array(z.string()).describe('The list of original, authoritative legal clauses.'),
-  explainedClauses: z.array(z.object({
-      original_text: z.string(),
-      plain_english_explanation: z.string(),
-  })).describe('The list of AI-generated explanations, corresponding to the source clauses.'),
-});
-export type VerifyBatchExplanationInput = z.infer<typeof VerifyBatchExplanationInputSchema>;
-
-
-// Schema for the detailed feedback on failed verifications
-const VerificationFailureFeedbackSchema = z.object({
-  clause_substring: z.string().describe("A short, unique substring from the original clause that failed verification."),
-  reason: z.string().describe("The reason for the verification failure (e.g., 'The explanation mentions information not present in the source text.').")
-});
-
-// Schema for the final output of the verifier prompt
-const VerifyBatchExplanationOutputSchema = z.object({
-  all_verified: z.boolean().describe("True if all explanations are accurate and grounded, false otherwise."),
-  feedback: z.array(VerificationFailureFeedbackSchema).describe("An array of feedback details for each explanation that failed verification. This should be empty if all are verified."),
-});
-export type VerifyBatchExplanationOutput = z.infer<typeof VerifyBatchExplanationOutputSchema>;
 
 
 export async function verifyBatchExplanation(input: VerifyBatchExplanationInput): Promise<VerifyBatchExplanationOutput> {

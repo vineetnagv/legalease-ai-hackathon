@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,23 +9,13 @@
  * - GenerateFaqOutput - The return type for the generateFaq function.
  */
 
-import { analyzerAgent as ai } from '@/ai/agents';
-import {z} from 'genkit';
-
-const GenerateFaqInputSchema = z.object({
-  documentText: z.string().describe('The text content of the legal document.'),
-  userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).'),
-  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
-});
-export type GenerateFaqInput = z.infer<typeof GenerateFaqInputSchema>;
-
-const GenerateFaqOutputSchema = z.object({
-    faqs: z.array(z.object({
-        question: z.string().describe("A frequently asked question about the document."),
-        answer: z.string().describe("The answer to the question, based on the document content."),
-    })).describe("A list of frequently asked questions and their answers."),
-});
-export type GenerateFaqOutput = z.infer<typeof GenerateFaqOutputSchema>;
+import { ai } from '@/ai/agents';
+import {
+  GenerateFaqInputSchema,
+  GenerateFaqOutputSchema,
+  type GenerateFaqInput,
+  type GenerateFaqOutput,
+} from '@/lib/ai-types';
 
 
 export async function generateFaq(input: GenerateFaqInput): Promise<GenerateFaqOutput> {

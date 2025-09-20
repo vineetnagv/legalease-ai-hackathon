@@ -4,23 +4,19 @@
 import {
   assessDocumentRisk,
   type AssessDocumentRiskInput,
-  type AssessDocumentRiskOutput,
 } from '@/ai/flows/assess-document-risk';
 import {
   extractKeyNumbers,
   type ExtractKeyNumbersInput,
-  type ExtractKeyNumbersOutput,
 } from '@/ai/flows/extract-key-numbers';
 import {
   explainClauses,
   type ExplainClausesInput,
-  type ExplainClausesOutput,
 } from '@/ai/flows/explain-clauses';
 import { suggestUserRole } from '@/ai/flows/suggest-user-role';
 import {
   generateFaq,
   type GenerateFaqInput,
-  type GenerateFaqOutput,
 } from '@/ai/flows/generate-faq';
 import { supportedLanguages, languageForAI } from '@/lib/types';
 import {
@@ -30,8 +26,14 @@ import {
 import {
   detectMissingClauses,
   type DetectMissingClausesInput,
-  type DetectMissingClausesOutput,
 } from '@/ai/flows/detect-missing-clauses';
+import type {
+  AssessDocumentRiskOutput,
+  ExtractKeyNumbersOutput,
+  ExplainClausesOutput,
+  GenerateFaqOutput,
+  DetectMissingClausesOutput,
+} from '@/lib/ai-types';
 
 /**
  * Splits a document's text into an array of clauses.

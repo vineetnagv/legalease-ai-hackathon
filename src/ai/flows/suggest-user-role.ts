@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,18 +9,13 @@
  * - SuggestUserRoleOutput - The return type for the suggestUserRole function.
  */
 
-import { analyzerAgent as ai } from '@/ai/agents';
-import {z} from 'genkit';
-
-const SuggestUserRoleInputSchema = z.object({
-  documentText: z.string().describe('The text content of the legal document.'),
-});
-export type SuggestUserRoleInput = z.infer<typeof SuggestUserRoleInputSchema>;
-
-const SuggestUserRoleOutputSchema = z.object({
-    suggestedRole: z.string().describe('A likely role for the user based on the document (e.g., Tenant, Landlord, Employee).'),
-});
-export type SuggestUserRoleOutput = z.infer<typeof SuggestUserRoleOutputSchema>;
+import { ai } from '@/ai/agents';
+import {
+  SuggestUserRoleInputSchema,
+  SuggestUserRoleOutputSchema,
+  type SuggestUserRoleInput,
+  type SuggestUserRoleOutput,
+} from '@/lib/ai-types';
 
 
 export async function suggestUserRole(input: SuggestUserRoleInput): Promise<SuggestUserRoleOutput> {

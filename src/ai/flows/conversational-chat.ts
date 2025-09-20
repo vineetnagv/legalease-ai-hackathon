@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -8,27 +9,14 @@
  * - ChatAboutDocumentOutput - The return type for the chatAboutDocument function.
  */
 
-import { chatAgent as ai } from '@/ai/agents';
-import {z} from 'genkit';
+import { ai } from '@/ai/agents';
+import {
+  ChatAboutDocumentInputSchema,
+  ChatAboutDocumentOutputSchema,
+  type ChatAboutDocumentInput,
+  type ChatAboutDocumentOutput,
+} from '@/lib/ai-types';
 
-const ChatMessageSchema = z.object({
-  role: z.enum(['user', 'model']),
-  content: z.string(),
-});
-
-const ChatAboutDocumentInputSchema = z.object({
-  documentText: z.string().describe('The text content of the legal document.'),
-  userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).'),
-  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
-  question: z.string().describe("The user's current question about the document."),
-  history: z.array(ChatMessageSchema).describe('The history of the conversation so far.'),
-});
-export type ChatAboutDocumentInput = z.infer<typeof ChatAboutDocumentInputSchema>;
-
-const ChatAboutDocumentOutputSchema = z.object({
-    answer: z.string().describe("The AI's answer to the user's question."),
-});
-export type ChatAboutDocumentOutput = z.infer<typeof ChatAboutDocumentOutputSchema>;
 
 export async function chatAboutDocument(input: ChatAboutDocumentInput): Promise<ChatAboutDocumentOutput> {
   return chatAboutDocumentFlow(input);

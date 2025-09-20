@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -9,46 +10,20 @@
  * - ExplainClausesOutput - The return type for the explainClauses function.
  */
 
-import { analyzerAgent as ai } from '@/ai/agents';
-import {z} from 'genkit';
+import { ai } from '@/ai/agents';
 import { verifyBatchExplanation } from './verify-explanation';
+import {
+  ExplainClausesInputSchema,
+  ExplainClausesOutputSchema,
+  AnalyzerInputSchema,
+  type ExplainClausesInput,
+  type ExplainClausesOutput,
+} from '@/lib/ai-types';
 
-const ExplainClausesInputSchema = z.object({
-  clauses: z.array(
-    z.string().describe('A legal clause from the document.')
-  ).describe('The legal clauses to be explained.'),
-  userRole: z.string().describe('The role of the user in the legal agreement (e.g., Tenant, Landlord).'),
-  language: z.string().describe('The language for the analysis output (e.g., "English", "Hindi").'),
-});
-export type ExplainClausesInput = z.infer<typeof ExplainClausesInputSchema>;
-
-const JargonTermSchema = z.object({
-    term: z.string().describe('The legal jargon term identified.'),
-    definition: z.string().describe('A simple, plain language definition of the jargon term.'),
-});
-
-const ExplainedClauseSchema = z.object({
-    original_text: z.string().describe('The original legal clause text.'),
-    plain_english_explanation: z.string().describe('A simplified explanation of the clause in plain English.'),
-    jargon_terms: z.array(JargonTermSchema).describe('An array of jargon terms identified in the clause, along with their definitions.'),
-});
-
-const ExplainClausesOutputSchema = z.array(ExplainedClauseSchema);
-
-export type ExplainClausesOutput = z.infer<typeof ExplainClausesOutputSchema>;
 
 export async function explainClauses(input: ExplainClausesInput): Promise<ExplainClausesOutput> {
   return explainClausesFlow(input);
 }
-
-
-// Internal schema for the Analyzer agent's prompt
-const AnalyzerInputSchema = z.object({
-  clauses: z.array(z.string()),
-  userRole: z.string(),
-  language: z.string(),
-  retry_feedback: z.string().optional().describe("Feedback from the verifier agent on a previous failed attempt, indicating which clauses were inaccurate."),
-});
 
 // The prompt for the "Analyzer Agent" - now processes a batch of clauses
 const analyzerPrompt = ai.definePrompt({
