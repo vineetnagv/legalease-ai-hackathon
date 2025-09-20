@@ -23,8 +23,8 @@ Document:
   },
   async (input) => {
     const llmResponse = await ai.generate({
-      model: 'gemini-pro',
       prompt: input,
+      model: 'gemini-pro',
       output: {
         format: 'text',
       },
