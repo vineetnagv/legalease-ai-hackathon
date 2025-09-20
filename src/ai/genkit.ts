@@ -8,7 +8,6 @@
 
 import { genkit } from 'genkit';
 import { googleAI } from '@genkit-ai/googleai';
-import { GENKIT_ENV } from 'genkit/environment';
 
 // Initialize Genkit with the Google AI plugin.
 // The plugin automatically looks for the GOOGLE_GENAI_API_KEY or
@@ -21,8 +20,4 @@ export const ai = genkit({
       // apiKey: process.env.YOUR_CUSTOM_API_KEY_ENV_VAR
     }),
   ],
-  // Log to the console in development, but not in production.
-  logLevel: GENKIT_ENV === 'production' ? 'warn' : 'debug',
-  // Keep user data out of the logs.
-  enableTraceStore: false,
 });
