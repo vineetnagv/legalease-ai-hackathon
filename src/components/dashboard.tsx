@@ -78,12 +78,22 @@ export default function Dashboard() {
             setSelectedRoleOption(role);
             setStatus('ready');
           } catch (e) {
-            const errorMessage =
-              e instanceof Error ? e.message : 'Could not suggest a role.';
+            const error = e instanceof Error ? e : new Error(String(e));
+            let errorTitle = t('role_suggestion_failed');
+            let errorDescription = t('unexpected_error_occurred');
+
+            if (error.message.includes('Document text is required')) {
+              errorDescription = t('error_empty_document');
+            } else if (error.message.includes('model not found')) {
+              errorDescription = t('error_model_not_found');
+            } else if (error.message.includes('API key')) {
+              errorDescription = t('error_api_key');
+            }
+            
             toast({
               variant: 'destructive',
-              title: t('role_suggestion_failed'),
-              description: errorMessage,
+              title: errorTitle,
+              description: errorDescription,
             });
             setStatus('idle');
           }
