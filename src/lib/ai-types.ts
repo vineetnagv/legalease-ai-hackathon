@@ -1,6 +1,3 @@
-
-'use server';
-
 /**
  * @fileOverview Centralized Zod schemas and TypeScript types for AI-related data structures.
  */
