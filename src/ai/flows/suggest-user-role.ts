@@ -24,7 +24,6 @@ Document:
   async (input) => {
     const llmResponse = await ai.generate({
       prompt: input,
-      model: 'gemini-pro',
       output: {
         format: 'text',
       },
