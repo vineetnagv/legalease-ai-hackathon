@@ -37,9 +37,38 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.genkit/*
+# Environment variables - IMPORTANT: Keep all .env files private
 .env*
+!.env.example
 
-# firebase
+# Firebase
 firebase-debug.log
 firestore-debug.log
+.firebase/
+.firebaserc.local
+
+# Google Cloud / AI Services
+service-account*.json
+google-credentials*.json
+.genkit/*
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Development artifacts
+*.tar.gz
+*.zip
+/docs/build/
+/coverage/
+
+# Temporary files
+.tmp/
+.cache/
+.temp/
+
+# Claude Development
+.claude/

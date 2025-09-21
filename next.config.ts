@@ -30,6 +30,28 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config, { isServer }) => {
+    // Only configure for server-side builds (API routes)
+    if (isServer) {
+      // Exclude problematic test files and dependencies from the bundle
+      config.externals = config.externals || [];
+      config.externals.push({
+        // Mark canvas as external to avoid bundling issues
+        canvas: 'canvas',
+      });
+
+      // Ignore test files and directories
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new (require('webpack')).IgnorePlugin({
+          resourceRegExp: /^\.\/test/,
+          contextRegExp: /pdf-parse/,
+        })
+      );
+    }
+
+    return config;
+  },
 };
 
 export default nextConfig;

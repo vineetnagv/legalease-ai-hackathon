@@ -1,77 +1,238 @@
-# Legalease AI
+# 🏛️ LegalEase AI
 
-Legalease AI is a prototype application built with Next.js and Firebase that helps users understand complex legal documents. By uploading a contract and specifying their role, users can get an AI-powered analysis that includes a risk assessment, extraction of key numbers, and a breakdown of complex clauses into plain English.
+**AI-Powered Legal Document Analysis Platform**
 
-This project was generated in Firebase Studio.
+[![Next.js](https://img.shields.io/badge/Next.js-15.3.3-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-11.9.1-orange)](https://firebase.google.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-## Features
+> 🏆 **Hackathon Project**: Transform complex legal documents into clear, actionable insights using AI
 
-- **Secure Authentication**: Sign in with your Google account.
-- **Document Upload**: Drag and drop text files for analysis.
-- **AI-Powered Analysis**: Get a comprehensive breakdown of your legal document.
-  - **Risk Meter**: A visual gauge of the document's risk level.
-  - **Key Numbers**: Important figures and dates extracted for quick reference.
-  - **Clause Explanations**: Complex legal clauses translated into simple, understandable language with a jargon-busting feature.
+LegalEase AI is an intelligent document analysis platform that helps users understand complex legal documents through AI-powered analysis. Whether you're a business owner reviewing contracts or an individual navigating legal documents, LegalEase provides comprehensive insights in plain English.
 
-## Getting Started
+## ✨ Features
 
-### 1. Prerequisites
+### 🔍 **Intelligent Document Analysis**
+- **Multi-format Support**: Upload `.pdf`, `.docx`, or `.txt` files
+- **Smart Document Detection**: Automatically identifies document types (contracts, leases, etc.)
+- **Role-Based Analysis**: Tailored insights based on your role (tenant, business owner, etc.)
+
+### 🎯 **Core Analysis Features**
+- **📊 Risk Assessment**: Visual risk meter with detailed explanations
+- **📅 Key Numbers Extraction**: Important dates, amounts, and deadlines
+- **📝 Plain English Explanations**: Complex legal clauses broken down simply
+- **❓ FAQ Generation**: Common questions answered for your specific role
+- **⚠️ Missing Clause Detection**: Identifies important protections you might be missing
+
+### 🚀 **Advanced Capabilities**
+- **🎙️ Voice Input**: Speak your questions naturally
+- **💬 Interactive Chat**: Ask follow-up questions about your document
+- **📄 Document Comparison**: Compare multiple documents side-by-side
+- **📋 Export Options**: Download analysis as PDF or copy to clipboard
+- **🌙 Dark Mode**: Full dark/light theme support
+
+### 🔒 **Security & Privacy**
+- **Secure Authentication**: Google OAuth integration
+- **Private Processing**: Documents processed securely and not stored permanently
+- **User Preferences**: Customizable interface and settings
+
+## 🎥 Demo
+
+*[Add screenshots or demo video here]*
+
+**Key Workflows:**
+1. **Upload** → Drag & drop your legal document
+2. **Analyze** → AI processes and extracts insights
+3. **Understand** → Review risk levels, key terms, and explanations
+4. **Chat** → Ask questions about specific clauses
+5. **Export** → Save or share your analysis
+
+## 🛠️ Technology Stack
+
+- **Frontend**: [Next.js 15](https://nextjs.org/) with App Router
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **UI Framework**: [React 18](https://react.dev/) + [Tailwind CSS](https://tailwindcss.com/)
+- **Components**: [shadcn/ui](https://ui.shadcn.com/) + [Radix UI](https://www.radix-ui.com/)
+- **Authentication**: [Firebase Auth](https://firebase.google.com/docs/auth)
+- **AI Services**: [Google Gemini](https://ai.google.dev/) + [Vertex AI](https://cloud.google.com/vertex-ai)
+- **Document Processing**: [pdf-parse](https://www.npmjs.com/package/pdf-parse), [mammoth](https://www.npmjs.com/package/mammoth)
+- **Voice Input**: Web Speech API
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+
+## 🚀 Getting Started
+
+### Prerequisites
 
 - [Node.js](https://nodejs.org/) (version 18 or later)
 - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- Firebase project with Authentication enabled
+- Google AI API keys (Gemini/Vertex AI)
 
-### 2. Set up Firebase
+### 1. Clone the Repository
 
-1.  Create a new Firebase project at [console.firebase.google.com](https://console.firebase.google.com/).
-2.  Go to **Project Settings** (click the gear icon ⚙️ next to "Project Overview").
-3.  Under the **General** tab, scroll down to "Your apps".
-4.  If you don't have a web app, create one by clicking the `</>` (Web) icon.
-5.  Find your web app's Firebase configuration snippet. It will look like this:
-    ```javascript
-    const firebaseConfig = {
-      apiKey: "AIza...",
-      authDomain: "your-project-id.firebaseapp.com",
-      // ... and so on
-    };
-    ```
-6.  In your project's code, create a new file named `.env` in the root directory.
-7.  Copy and paste the following content into your new `.env` file, replacing the placeholder values with the actual keys from your Firebase config snippet:
+```bash
+git clone https://github.com/your-username/legalease-ai.git
+cd legalease-ai
+```
 
-    ```
-    NEXT_PUBLIC_FIREBASE_API_KEY="your-api-key"
-    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="your-auth-domain"
-    NEXT_PUBLIC_FIREBASE_PROJECT_ID="your-project-id"
-    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET="your-storage-bucket"
-    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID="your-messaging-sender-id"
-    NEXT_PUBLIC_FIREBASE_APP_ID="your-app-id"
-    ```
-8. In your Firebase project, go to **Authentication** (from the left menu), select the **Sign-in method** tab, and enable the **Google** provider.
-9. In the **Authentication** section, select the **Settings** tab. Under **Authorized domains**, click **Add domain** and add the following:
-    - `localhost` (for local development)
-    - Your deployed application's domain (e.g., `your-app-name.web.app`) if you have deployed it.
-
-### 3. Install Dependencies
-
-Navigate to the project directory and install the required packages:
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 4. Run the Development Server
+### 3. Set Up Environment Variables
 
-Start the Next.js development server:
+1. Copy the example environment file:
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Configure Firebase:
+   - Create a [Firebase project](https://console.firebase.google.com/)
+   - Enable **Authentication** with Google provider
+   - Copy your Firebase config values to `.env.local`
+
+3. Configure AI Services:
+   - Get a [Google AI API key](https://ai.google.dev/) for Gemini
+   - Set up [Vertex AI](https://cloud.google.com/vertex-ai) for advanced features
+   - Add your API keys to `.env.local`
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
 ```
 
-The application will be available at [http://localhost:9002](http://localhost:9002). **You may need to restart the development server after updating the `.env` file for the changes to take effect.**
+Open [http://localhost:9002](http://localhost:9002) to see the application.
 
-## Tech Stack
+### 5. Build for Production
 
-- **Framework**: [Next.js](https://nextjs.org/) (App Router)
-- **Authentication**: [Firebase Authentication](https://firebase.google.com/docs/auth)
-- **AI**: [Google AI & Genkit](https://firebase.google.com/docs/genkit)
-- **UI**: [React](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/), [shadcn/ui](https://ui.shadcn.com/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
+```bash
+npm run build
+npm start
+```
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # API routes
+│   │   └── parse-document # Document processing endpoint
+│   └── actions.ts         # Server actions
+├── components/            # React components
+│   ├── ui/               # Reusable UI components
+│   ├── panels/           # Feature panels (chat, settings, etc.)
+│   └── chat-interface.tsx # Main chat interface
+├── hooks/                 # Custom React hooks
+│   └── use-simple-voice-input.ts # Voice input logic
+├── lib/                   # Utility libraries
+│   ├── firebase/         # Firebase configuration
+│   ├── export-utils.ts   # Document export utilities
+│   └── chat-storage.ts   # Chat persistence
+├── ai/                    # AI processing flows
+│   └── flows/            # Individual analysis workflows
+└── types/                 # TypeScript type definitions
+```
+
+## 🔧 Configuration
+
+### Firebase Setup
+
+1. **Create Firebase Project**:
+   - Go to [Firebase Console](https://console.firebase.google.com/)
+   - Create a new project
+   - Enable Authentication with Google provider
+
+2. **Get Configuration**:
+   ```javascript
+   // Found in Project Settings > General > Your apps
+   const firebaseConfig = {
+     apiKey: "your-api-key",
+     authDomain: "your-project.firebaseapp.com",
+     projectId: "your-project-id",
+     // ... other config
+   };
+   ```
+
+### AI Services Setup
+
+1. **Google AI (Gemini)**:
+   - Visit [Google AI Studio](https://ai.google.dev/)
+   - Create an API key
+   - Add to `GEMINI_API_KEY` in your environment
+
+2. **Vertex AI** (Optional - for advanced features):
+   - Enable Vertex AI in Google Cloud Console
+   - Create service account credentials
+   - Add API keys to environment variables
+
+## 📝 Usage Examples
+
+### Basic Document Analysis
+```javascript
+// Upload document → Automatic analysis
+// Results include: risk score, key numbers, clause explanations
+```
+
+### Voice Interaction
+```javascript
+// Click microphone → Speak question → Get AI response
+// Example: "What are the termination conditions in this lease?"
+```
+
+### Document Comparison
+```javascript
+// Upload second document → Compare clauses and terms
+// Identify differences and missing protections
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🏆 Hackathon Information
+
+**Project Category**: Legal Tech / AI Innovation
+**Development Time**: [Your timeframe]
+**Team Size**: [Your team size]
+
+### Key Achievements
+- ✅ Full-stack document analysis platform
+- ✅ Multi-modal AI integration (text + voice)
+- ✅ Real-time document processing
+- ✅ Responsive, accessible UI
+- ✅ Production-ready deployment
+
+### Challenges Overcome
+- Complex PDF text extraction and OCR processing
+- Voice input reliability and user experience
+- Real-time AI streaming and progress indicators
+- Document comparison algorithms
+- Mobile-responsive legal document interface
+
+## 🔗 Links
+
+- **Live Demo**: [Add your deployment URL]
+- **Documentation**: [HACKATHON.md](HACKATHON.md)
+- **API Documentation**: [API Reference](docs/api.md)
+
+## 📞 Support
+
+For questions or support:
+- Open an [issue](https://github.com/your-username/legalease-ai/issues)
+- Contact: [your-email@example.com]
+
+---
+
+**Built with ❤️ for making legal documents accessible to everyone**
