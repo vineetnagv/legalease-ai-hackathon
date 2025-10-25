@@ -16,6 +16,7 @@ import { useTranslation } from '@/lib/translations';
 import { ThemeToggle } from './theme-toggle';
 import { LanguageSelector } from './language-selector';
 import { FirebaseError } from 'firebase/app';
+import { Squares } from '@/components/ui/squares-background';
 
 const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
     <div className={`flex items-center text-sm ${met ? 'text-green-600' : 'text-muted-foreground'}`}>
@@ -109,13 +110,29 @@ export default function LoginPage() {
 
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center bg-background p-4">
-      <div className="absolute top-4 right-4 flex items-center gap-2">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden">
+      {/* Background overlay for better contrast */}
+      <div className="absolute inset-0 z-0 bg-background/60" />
+
+      {/* Animated Squares Background */}
+      <div className="absolute inset-0 z-10">
+        <Squares
+          direction="down"
+          speed={0.2}
+          squareSize={40}
+          borderColor="rgba(148, 163, 184, 0.4)"
+          hoverFillColor="rgba(148, 163, 184, 0.3)"
+          className="opacity-80"
+          dynamicDirection={true}
+        />
+      </div>
+
+      <div className="absolute top-4 right-4 z-30 flex items-center gap-2">
         <LanguageSelector />
         <ThemeToggle />
       </div>
 
-      <Card className="w-full max-w-md shadow-xl">
+      <Card className="relative z-20 w-full max-w-md shadow-xl backdrop-blur-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex items-center justify-center gap-2">
             <Logo className="h-8 w-8 text-primary" />
