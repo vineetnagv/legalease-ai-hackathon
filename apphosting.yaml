@@ -4,4 +4,18 @@
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
-  maxInstances: 1
+  maxInstances: 3
+
+  # Set min instances to reduce cold starts
+  minInstances: 1
+
+  # Configure CPU and memory for better performance
+  cpu: 1
+  memoryMiB: 512
+
+  # Environment variables for production
+  environmentVariables:
+    NODE_ENV: "production"
+    NEXT_PRIVATE_STANDALONE: "true"
+    # Disable incremental cache to prevent hash mismatches in cloud builds
+    NEXT_DISABLE_INCREMENTAL_CACHE: "1"

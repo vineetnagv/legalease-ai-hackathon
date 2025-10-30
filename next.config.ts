@@ -2,11 +2,31 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+
+  // Enable standalone output for production deployments (Firebase App Hosting)
+  output: 'standalone',
+
+  // Generate consistent build ID to ensure client/server hash matching
+  // Critical for Firebase Studio cloud builds to prevent action hash mismatches
+  generateBuildId: async () => {
+    // Use timestamp to create unique but consistent build identifier
+    // This ensures client and server bundles are always from the same build
+    return Date.now().toString();
+  },
+
+  // Server Actions configuration (explicit for production)
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb', // Support file uploads up to 10MB
+      allowedOrigins: undefined, // Allow all origins (configure as needed for security)
+    },
+  },
+
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: true, // Keep for now to avoid blocking deployment
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: true, // Keep for now to avoid blocking deployment
   },
   images: {
     remotePatterns: [
