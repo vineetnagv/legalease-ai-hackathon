@@ -32,7 +32,8 @@ export interface UserPreferences {
     language: string;
     showAnimations: boolean;
     compactMode: boolean;
-    dockPosition: 'right' | 'left' | 'hidden';
+    dockPosition: 'right' | 'left' | 'bottom';
+    analysisViewMode: 'scroll' | 'tabs';
   };
 
   // Privacy Settings
@@ -67,6 +68,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
     showAnimations: true,
     compactMode: false,
     dockPosition: 'right',
+    analysisViewMode: 'scroll',
   },
   privacy: {
     analyticsOptIn: false,

@@ -1,7 +1,5 @@
-'use server';
 /**
  * @fileOverview A Genkit flow for detecting the type of legal document.
- * This file only exports async functions as required by Next.js 'use server' rules.
  */
 
 import { ai } from '@/ai/genkit';
@@ -22,8 +20,23 @@ export const detectDocumentType = ai.defineFlow(
   },
   async ({ documentText }) => {
     try {
-      const response = await ai.generate({
-        prompt: `You are an expert legal document classifier. Your task is to analyze the provided legal document text and determine its specific type.
+      // Validate API key before attempting generation
+      if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_GENAI_API_KEY) {
+        console.error('❌ GEMINI_API_KEY not found in environment variables');
+        return {
+          documentType: 'Unclassified Document' as DocumentType,
+          confidence: 0,
+          reasoning: 'API key not configured. Please set GEMINI_API_KEY in environment variables.'
+        };
+      }
+
+      // Retry wrapper for AI generation with exponential backoff
+      const generateWithRetry = async (maxRetries = 3) => {
+        let lastError;
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+          try {
+            const response = await ai.generate({
+              prompt: `You are an expert legal document classifier. Your task is to analyze the provided legal document text and determine its specific type.
 
 CLASSIFICATION APPROACH:
 You should create a specific, descriptive document type based on the content analysis. Be as specific as possible while remaining accurate.
@@ -59,21 +72,47 @@ Respond with a JSON object containing:
 - confidence: number from 0-100
 - reasoning: brief explanation (1-2 sentences) of why this specific type was chosen`,
 
-        config: {
-          format: 'json',
-          temperature: 0.3, // Lower temperature for more consistent classification
-        },
-      });
+              output: {
+                format: 'json',
+                schema: DetectDocumentTypeOutputSchema,
+              },
+              config: {
+                temperature: 0.3, // Lower temperature for more consistent classification
+              },
+            });
+            return response;
+          } catch (error) {
+            lastError = error;
+            console.error(`Document type detection attempt ${attempt}/${maxRetries} failed:`, error);
 
-      // Parse the AI response
+            if (attempt < maxRetries) {
+              const delay = Math.pow(2, attempt - 1) * 1000; // 1s, 2s, 4s exponential backoff
+              console.log(`Retrying in ${delay}ms...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
+            }
+          }
+        }
+        throw lastError; // All retries failed
+      };
+
+      const response = await generateWithRetry();
+
+      // Get the AI response output (schema handles parsing automatically)
       let result: DetectDocumentTypeOutput;
 
       try {
-        const responseText = response.text || '';
-        const cleanedResponse = responseText.trim().replace(/```json\s*/, '').replace(/\s*```$/, '');
-        result = JSON.parse(cleanedResponse);
+        // Use response.output which is automatically parsed by the schema
+        if (!response.output) {
+          throw new Error('No output received from AI model');
+        }
+
+        result = response.output;
+
+        if (!result.documentType) {
+          throw new Error('Invalid response structure from AI model');
+        }
       } catch (parseError) {
-        console.error('Failed to parse document type detection response:', parseError);
+        console.error('Failed to get document type detection response:', parseError);
 
         // Fallback: try to extract document type from response text
         const responseText = response.text || '';
@@ -156,11 +195,43 @@ Respond with a JSON object containing:
     } catch (error) {
       console.error('Document type detection error:', error);
 
-      // Return a safe fallback
+      let reasoningMessage = 'Unable to classify document due to processing error';
+
+      if (error instanceof Error) {
+        console.error('Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+
+        // Provide specific error messages based on error type
+        const errorMessage = error.message.toLowerCase();
+
+        if (errorMessage.includes('api key') || errorMessage.includes('401') || errorMessage.includes('unauthorized')) {
+          console.error('⚠️ API AUTHENTICATION FAILED: Check that GEMINI_API_KEY is properly set');
+          reasoningMessage = 'API authentication failed. Please check GEMINI_API_KEY configuration.';
+        } else if (errorMessage.includes('quota') || errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+          console.error('⚠️ API QUOTA EXCEEDED: Rate limit or quota reached');
+          reasoningMessage = 'API quota exceeded. Please try again later or upgrade your plan.';
+        } else if (errorMessage.includes('timeout') || errorMessage.includes('etimedout') || errorMessage.includes('econnaborted')) {
+          console.error('⚠️ REQUEST TIMEOUT: Network or API timeout');
+          reasoningMessage = 'Request timed out. Please check network connection and try again.';
+        } else if (errorMessage.includes('enotfound') || errorMessage.includes('econnrefused')) {
+          console.error('⚠️ NETWORK ERROR: Cannot reach API endpoint');
+          reasoningMessage = 'Network error. Please check internet connection.';
+        } else if (errorMessage.includes('model') || errorMessage.includes('not found')) {
+          console.error('⚠️ MODEL ERROR: Requested model may not be available');
+          reasoningMessage = 'AI model error. The requested model may not be available.';
+        } else {
+          reasoningMessage = `API Error: ${error.message}`;
+        }
+      }
+
+      // Return a safe fallback with descriptive error message
       return {
         documentType: 'Unclassified Document' as DocumentType,
         confidence: 0,
-        reasoning: 'Unable to classify document due to processing error'
+        reasoning: reasoningMessage
       };
     }
   }

@@ -1,4 +1,3 @@
-'use server';
 /**
  * @fileOverview A Genkit flow for explaining legal clauses in plain English with jargon definitions.
  */

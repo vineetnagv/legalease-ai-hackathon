@@ -38,3 +38,33 @@ export const DetectDocumentTypeOutputSchema = z.object({
 // Inferred types
 export type DetectDocumentTypeInput = z.infer<typeof DetectDocumentTypeInputSchema>;
 export type DetectDocumentTypeOutput = z.infer<typeof DetectDocumentTypeOutputSchema>;
+
+export const DocumentSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  content: z.string(),
+  createdAt: z.date(),
+  // Top-level metadata
+  documentType: z.string().optional(),
+  documentTypeConfidence: z.number().optional(),
+  userRole: z.string().optional(),
+  // Optional analysis results
+  analysis: z.object({
+    documentType: z.string().optional(),
+    documentTypeConfidence: z.number().optional(),
+    keyNumbers: z.array(z.object({
+      label: z.string(),
+      value: z.string(),
+    })).optional(),
+    riskScore: z.number().optional(),
+    riskSummary: z.string().optional(),
+    missingClauses: z.any().optional(), // DetectMissingClausesOutput
+    clauses: z.array(z.any()).optional(), // ClauseExplanation[]
+    faqs: z.array(z.object({
+      question: z.string(),
+      answer: z.string(),
+    })).optional(),
+  }).optional(),
+});
+
+export type Document = z.infer<typeof DocumentSchema>;

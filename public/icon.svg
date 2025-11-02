@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <!-- Background circle for better visibility -->
+  <circle cx="24" cy="24" r="24" fill="#1e3a8a"/>
+
+  <!-- Scale of Justice (Lucide Scale icon adapted) -->
+  <g transform="translate(12, 14)" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Center pole -->
+    <line x1="12" y1="0" x2="12" y2="18"/>
+
+    <!-- Top beam -->
+    <line x1="3" y1="6" x2="21" y2="6"/>
+
+    <!-- Left scale pan -->
+    <path d="M 7 6 L 3 12 L 11 12 Z" fill="none"/>
+
+    <!-- Right scale pan -->
+    <path d="M 17 6 L 13 12 L 21 12 Z" fill="none"/>
+
+    <!-- Base -->
+    <line x1="8" y1="18" x2="16" y2="18"/>
+  </g>
+
+  <!-- AI Sparkle accent -->
+  <g transform="translate(32, 10)">
+    <path d="M 0 -4 L 0.5 -1 L 4 0 L 0.5 1 L 0 4 L -0.5 1 L -4 0 L -0.5 -1 Z" fill="#fbbf24"/>
+  </g>
+</svg>

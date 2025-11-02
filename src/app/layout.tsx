@@ -16,6 +16,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Legalease AI',
   description: 'Understand Your Legal Documents with Confidence.',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

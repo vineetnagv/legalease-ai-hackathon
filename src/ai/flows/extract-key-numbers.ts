@@ -1,4 +1,3 @@
-'use server';
 /**
  * @fileOverview A Genkit flow for extracting key numbers and dates from legal documents.
  */

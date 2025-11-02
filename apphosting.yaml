@@ -19,3 +19,8 @@ runConfig:
     NEXT_PRIVATE_STANDALONE: "true"
     # Disable incremental cache to prevent hash mismatches in cloud builds
     NEXT_DISABLE_INCREMENTAL_CACHE: "1"
+
+  # Secret references - Firebase App Hosting format
+  env:
+    - variable: GEMINI_API_KEY
+      secret: GEMINI_API_KEY

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ai } from '@/ai/genkit';
 
 interface ParseResult {
   text: string;
   metadata: {
     fileType: string;
     fileSize: number;
-    extractionMethod: 'text' | 'pdf-parse' | 'mammoth' | 'ocr-vision' | 'ocr-tesseract';
+    extractionMethod: 'text' | 'pdf-parse' | 'mammoth' | 'ocr-gemini' | 'ocr-vision';
     confidence?: number;
     error?: string;
     pages?: number;
@@ -20,7 +21,7 @@ interface DocumentParserOptions {
 
 class ServerDocumentParser {
   private static readonly DEFAULT_MAX_SIZE = 10 * 1024 * 1024; // 10MB
-  private static readonly SUPPORTED_TYPES = ['.txt', '.pdf', '.docx'];
+  private static readonly SUPPORTED_TYPES = ['.txt', '.pdf', '.docx', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.tif', '.webp'];
 
   static async parse(file: File, options: DocumentParserOptions = {}): Promise<ParseResult> {
     const {
@@ -48,6 +49,11 @@ class ServerDocumentParser {
         throw new Error(`Unsupported file type: ${detectedType}. Supported types: ${ServerDocumentParser.SUPPORTED_TYPES.join(', ')}`);
       }
 
+      // Check if it's an image type
+      if (this.isImageType(detectedType)) {
+        return await this.parseImageFile(uint8Array, detectedType, enableOCR);
+      }
+
       switch (detectedType) {
         case 'txt':
           return await this.parseTextFile(file, uint8Array);
@@ -72,6 +78,24 @@ class ServerDocumentParser {
 
   private static isSupportedType(type: string): boolean {
     return ServerDocumentParser.SUPPORTED_TYPES.some(supported => supported.includes(type));
+  }
+
+  private static getImageMimeType(extension: string): string {
+    const mimeTypes: Record<string, string> = {
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+      'gif': 'image/gif',
+      'bmp': 'image/bmp',
+      'tiff': 'image/tiff',
+      'tif': 'image/tiff',
+      'webp': 'image/webp'
+    };
+    return mimeTypes[extension] || 'image/jpeg';
+  }
+
+  private static isImageType(extension: string): boolean {
+    return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff', 'tif', 'webp'].includes(extension);
   }
 
   private static async parseTextFile(file: File, buffer: Uint8Array): Promise<ParseResult> {
@@ -177,15 +201,54 @@ class ServerDocumentParser {
     }
   }
 
+  private static async parseImageFile(buffer: Uint8Array, extension: string, enableOCR: boolean): Promise<ParseResult> {
+    if (!enableOCR) {
+      throw new Error('Image files require OCR processing. Please enable OCR to process image files.');
+    }
+
+    try {
+      console.log(`Processing image file (${extension})...`);
+      const mimeType = this.getImageMimeType(extension);
+      return await this.performOCR(buffer, mimeType, true);
+    } catch (error) {
+      throw new Error(`Failed to process image file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
   private static async performOCR(buffer: Uint8Array, fileType: string, useFallback: boolean): Promise<ParseResult> {
     const ocrTimeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('OCR processing timeout after 60 seconds')), 60000);
+      setTimeout(() => reject(new Error('OCR processing timeout after 120 seconds')), 120000);
     });
 
-    // First try Google Cloud Vision (if available)
+    // First try Gemini Vision (uses GEMINI_API_KEY which is already configured)
+    try {
+      console.log('Attempting Gemini Vision OCR (primary method)...');
+      const text = await Promise.race([
+        this.performGeminiVisionOCR(buffer, fileType),
+        ocrTimeoutPromise
+      ]);
+
+      console.log(`✓ Gemini Vision OCR successful: ${text.length} characters extracted`);
+      return {
+        text: text.trim(),
+        metadata: {
+          fileType,
+          fileSize: buffer.length,
+          extractionMethod: 'ocr-gemini',
+          confidence: 0.95
+        }
+      };
+    } catch (error) {
+      console.warn('✗ Gemini Vision OCR failed:', error instanceof Error ? error.message : 'Unknown error');
+      if (!useFallback) {
+        throw error;
+      }
+    }
+
+    // Fallback to Google Cloud Vision (if available and configured)
     if (process.env.GOOGLE_CLOUD_VISION_API_KEY || process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       try {
-        console.log('Attempting Google Cloud Vision OCR...');
+        console.log('Attempting Google Cloud Vision OCR as fallback...');
         const text = await Promise.race([
           this.performCloudVisionOCR(buffer),
           ocrTimeoutPromise
@@ -202,38 +265,12 @@ class ServerDocumentParser {
           }
         };
       } catch (error) {
-        console.warn('Google Cloud Vision OCR failed:', error);
-        if (!useFallback) {
-          throw error;
-        }
+        console.warn('Google Cloud Vision OCR also failed:', error);
+        throw new Error(`All OCR methods failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
 
-    // Fallback to Tesseract.js (server-side)
-    if (useFallback) {
-      try {
-        console.log('Attempting Tesseract.js OCR fallback...');
-        const text = await Promise.race([
-          this.performTesseractOCR(buffer),
-          ocrTimeoutPromise
-        ]);
-
-        console.log(`Tesseract.js OCR successful: ${text.length} characters extracted`);
-        return {
-          text: text.trim(),
-          metadata: {
-            fileType,
-            fileSize: buffer.length,
-            extractionMethod: 'ocr-tesseract',
-            confidence: 0.7
-          }
-        };
-      } catch (error) {
-        throw new Error(`OCR failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-
-    throw new Error('OCR is not available - missing API credentials');
+    throw new Error('OCR failed with Gemini Vision. Google Cloud Vision is not configured. Please ensure GEMINI_API_KEY is set correctly.');
   }
 
   private static async performCloudVisionOCR(buffer: Uint8Array): Promise<string> {
@@ -272,24 +309,59 @@ class ServerDocumentParser {
     }
   }
 
-  private static async performTesseractOCR(buffer: Uint8Array): Promise<string> {
-    // Dynamic import to avoid bundling issues
-    const { createWorker } = await import('tesseract.js');
-
-    const worker = await createWorker(['eng']);
-
+  private static async performGeminiVisionOCR(buffer: Uint8Array, contentType: string): Promise<string> {
     try {
-      const { data: { text } } = await worker.recognize(Buffer.from(buffer));
+      console.log(`Starting Gemini Vision OCR for ${contentType}...`);
 
-      if (!text || text.trim() === '') {
-        throw new Error('OCR could not extract any text from the document');
+      // Convert buffer to base64 for Gemini API
+      const base64Data = Buffer.from(buffer).toString('base64');
+
+      // Use Gemini to extract text from the document
+      const response = await ai.generate({
+        prompt: [
+          {
+            text: `You are an expert OCR system. Extract ALL text from this document image or PDF.
+
+INSTRUCTIONS:
+1. Extract every piece of text you can see in the document
+2. Preserve the original structure and formatting as much as possible
+3. Include headers, body text, footnotes, tables, and any other text elements
+4. Maintain paragraph breaks and line spacing
+5. Do NOT add any commentary, explanations, or metadata
+6. Output ONLY the extracted text
+
+If the document contains multiple pages, extract text from all visible pages in order.`
+          },
+          {
+            media: {
+              url: `data:${contentType};base64,${base64Data}`,
+              contentType: contentType
+            }
+          }
+        ],
+        config: {
+          temperature: 0.1, // Low temperature for accurate extraction
+        },
+      });
+
+      const extractedText = response.text?.trim() || '';
+
+      if (!extractedText || extractedText.length === 0) {
+        throw new Error('Gemini Vision could not extract any text from the document');
       }
 
-      return text;
-    } finally {
-      await worker.terminate();
+      console.log(`Gemini Vision OCR successful: ${extractedText.length} characters extracted`);
+      return extractedText;
+
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Gemini Vision OCR error:', error.message);
+        throw new Error(`Gemini Vision OCR failed: ${error.message}`);
+      }
+      throw new Error('Gemini Vision OCR failed: Unknown error');
     }
   }
+
 }
 
 export async function POST(request: NextRequest) {

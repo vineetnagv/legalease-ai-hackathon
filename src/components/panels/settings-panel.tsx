@@ -414,7 +414,7 @@ export function SettingsPanel({ isOpen, onClose, className }: SettingsPanelProps
                               <SelectContent>
                                 <SelectItem value="right">Right Side</SelectItem>
                                 <SelectItem value="left">Left Side</SelectItem>
-                                <SelectItem value="hidden">Hidden</SelectItem>
+                                <SelectItem value="bottom">Bottom Center</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>

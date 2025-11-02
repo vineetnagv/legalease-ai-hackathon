@@ -296,4 +296,134 @@ export class DocumentReportExporter {
       return false;
     }
   }
+
+  /**
+   * Exports redrafted document comparison as PDF
+   */
+  static async exportRedraftToPDF(params: {
+    originalDocument: string;
+    redraftedDocument: string;
+    summaryOfChanges: string;
+    documentTitle?: string;
+    fileName?: string;
+  }): Promise<void> {
+    const { originalDocument, redraftedDocument, summaryOfChanges, documentTitle, fileName } = params;
+
+    // Create new PDF document
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    let yPosition = 20;
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+
+    // Helper function to add text with word wrapping
+    const addWrappedText = (text: string, x: number, y: number, maxWidth: number, fontSize: number = 10): number => {
+      pdf.setFontSize(fontSize);
+      const lines = pdf.splitTextToSize(text, maxWidth);
+      pdf.text(lines, x, y);
+      return y + (lines.length * (fontSize * 0.35)); // Approximate line height
+    };
+
+    // Helper function to check if we need a new page
+    const checkNewPage = (requiredSpace: number): number => {
+      if (yPosition + requiredSpace > 280) { // Near bottom of page
+        pdf.addPage();
+        return 20; // Reset to top of new page
+      }
+      return yPosition;
+    };
+
+    // Title
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text(documentTitle || 'Document Redraft', margin, yPosition);
+    yPosition += 10;
+
+    // Date
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, yPosition);
+    yPosition += 10;
+
+    // Separator line
+    pdf.setLineWidth(0.5);
+    pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Summary of Changes Section
+    yPosition = checkNewPage(40);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Summary of Changes', margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(10);
+    yPosition = addWrappedText(summaryOfChanges, margin, yPosition, contentWidth);
+    yPosition += 10;
+
+    // Separator line
+    pdf.setLineWidth(0.5);
+    pdf.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 10;
+
+    // Original Document Section
+    yPosition = checkNewPage(40);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Original Document', margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    const originalLines = originalDocument.split('\n');
+    for (const line of originalLines) {
+      yPosition = checkNewPage(10);
+      yPosition = addWrappedText(line || ' ', margin, yPosition, contentWidth, 9);
+      yPosition += 2;
+    }
+    yPosition += 10;
+
+    // New page for redrafted document
+    pdf.addPage();
+    yPosition = 20;
+
+    // Redrafted Document Section
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Redrafted Document', margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFont('helvetica', 'normal');
+    pdf.setFontSize(9);
+    const redraftedLines = redraftedDocument.split('\n');
+    for (const line of redraftedLines) {
+      yPosition = checkNewPage(10);
+      yPosition = addWrappedText(line || ' ', margin, yPosition, contentWidth, 9);
+      yPosition += 2;
+    }
+
+    // Add page numbers
+    const pageCount = pdf.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(8);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(
+        `Page ${i} of ${pageCount}`,
+        pageWidth / 2,
+        pdf.internal.pageSize.getHeight() - 10,
+        { align: 'center' }
+      );
+    }
+
+    // Save the PDF
+    const defaultFileName = fileName || `${documentTitle?.replace(/[^a-z0-9]/gi, '_') || 'document'}_redraft_${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(defaultFileName);
+  }
 }

@@ -5,6 +5,15 @@ import { useAuth } from '@/lib/firebase/auth-context';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { GoogleGLogo, Logo } from '@/components/icons';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
@@ -26,14 +35,17 @@ const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => (
 );
 
 export default function LoginPage() {
-  const { signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+  const { signInWithGoogle, signInWithEmail, signUpWithEmail, resetPassword } = useAuth();
   const { toast } = useToast();
   const { language } = useLanguage();
   const t = useTranslation(language);
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
   
   const passwordValidation = useMemo(() => {
     const hasUpperCase = /[A-Z]/.test(password);
@@ -108,6 +120,40 @@ export default function LoginPage() {
     }
   }
 
+  const handleResetPassword = async () => {
+    if (!resetEmail || !resetEmail.includes('@')) {
+      toast({
+        variant: 'destructive',
+        title: 'Invalid Email',
+        description: 'Please enter a valid email address.',
+      });
+      return;
+    }
+
+    setResettingPassword(true);
+    try {
+      await resetPassword(resetEmail);
+      toast({
+        title: 'Password Reset Email Sent',
+        description: 'Check your inbox for instructions to reset your password.',
+      });
+      setResetDialogOpen(false);
+      setResetEmail('');
+    } catch (error: any) {
+      let description = error.message;
+      if (error instanceof FirebaseError && error.code === 'auth/user-not-found') {
+        description = 'No account found with this email address.';
+      }
+      toast({
+        variant: 'destructive',
+        title: 'Reset Failed',
+        description: description,
+      });
+    } finally {
+      setResettingPassword(false);
+    }
+  };
+
 
   return (
     <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden">
@@ -157,7 +203,61 @@ export default function LoginPage() {
                 <Input id="email-signin" type="email" placeholder="m@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password-signin">{t('password')}</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password-signin">{t('password')}</Label>
+                  <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="link"
+                        className="h-auto p-0 text-xs text-primary hover:underline"
+                        type="button"
+                      >
+                        Forgot Password?
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Reset Password</DialogTitle>
+                        <DialogDescription>
+                          Enter your email address and we&apos;ll send you a link to reset your password.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="reset-email">Email</Label>
+                          <Input
+                            id="reset-email"
+                            type="email"
+                            placeholder="m@example.com"
+                            value={resetEmail}
+                            onChange={(e) => setResetEmail(e.target.value)}
+                            disabled={resettingPassword}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleResetPassword();
+                              }
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => setResetDialogOpen(false)}
+                          disabled={resettingPassword}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={handleResetPassword}
+                          disabled={resettingPassword}
+                        >
+                          {resettingPassword ? 'Sending...' : 'Send Reset Link'}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
+                </div>
                 <Input id="password-signin" type="password" value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
               </div>
               <Button onClick={() => handleAuthAction('signIn')} className="w-full" disabled={loading}>

@@ -1,4 +1,3 @@
-'use server';
 /**
  * @fileOverview A Genkit flow for generating relevant FAQs about legal documents.
  */

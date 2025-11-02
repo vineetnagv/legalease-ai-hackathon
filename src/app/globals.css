@@ -65,3 +65,147 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Google Rainbow Glow Border Animation - Border Image Approach */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes meteor-border-animation {
+  from { --angle: 0deg; }
+  to { --angle: 360deg; }
+}
+
+.glow-border {
+  border-width: 3px !important;
+  border-style: solid !important;
+  border-image-slice: 1;
+  border-image-source: conic-gradient(
+    from var(--angle),
+    transparent 40%,
+    #4285F4,   /* Google Blue */
+    #EA4335,   /* Google Red */
+    #FBBC05,   /* Google Yellow */
+    #34A853,   /* Google Green */
+    #4285F4,
+    transparent 70%
+  );
+  animation: meteor-border-animation 4s linear infinite;
+}
+
+.glow-border-dashed {
+  position: relative;
+  border-width: 3px !important;
+  border-style: dashed !important;
+  border-image-slice: 1;
+  border-image-source: conic-gradient(
+    from var(--angle),
+    transparent 40%,
+    #4285F4,
+    #EA4335,
+    #FBBC05,
+    #34A853,
+    #4285F4,
+    transparent 70%
+  );
+  animation: meteor-border-animation 4s linear infinite;
+}
+
+/* Resizable Panel Styling */
+[data-panel-resize-handle-enabled] {
+  position: relative;
+}
+
+[data-panel-resize-handle-enabled]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+
+[data-panel-resize-handle-enabled]:hover::before {
+  background: hsl(var(--primary) / 0.3);
+}
+
+[data-panel-resize-handle-enabled][data-resize-handle-active]::before {
+  background: hsl(var(--primary) / 0.6);
+}
+
+/* Notebook Panel Animations */
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.panel-slide-left {
+  animation: slideInFromLeft 0.3s ease-out;
+}
+
+.panel-slide-right {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+/* Chat Message Animations */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-animate {
+  animation: messageSlideIn 0.2s ease-out;
+}
+
+/* Smooth scrolling for navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for panels */
+.panel-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.panel-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.3);
+  border-radius: 4px;
+}
+
+.panel-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+.panel-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}

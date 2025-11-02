@@ -1,4 +1,3 @@
-'use server';
 /**
  * @fileOverview A Genkit flow for assessing document risk based on user role.
  */
@@ -15,7 +14,7 @@ const AssessDocumentRiskInputSchema = z.object({
 });
 
 // Define the output schema
-const AssessDocumentRiskOutputSchema = z.object({
+export const AssessDocumentRiskOutputSchema = z.object({
   riskScore: z.number().min(0).max(100).describe('Risk score from 0 (very low risk) to 100 (very high risk)'),
   riskSummary: z.string().describe('A brief, easy-to-understand summary of the main risk factors'),
 });

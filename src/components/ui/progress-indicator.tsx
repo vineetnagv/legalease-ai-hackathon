@@ -23,6 +23,7 @@ interface ProgressIndicatorProps {
   steps?: AnalysisStep[];
   className?: string;
   showDetailedView?: boolean;
+  onStepClick?: (stepId: string) => void;
 }
 
 const DEFAULT_ANALYSIS_STEPS: AnalysisStep[] = [
@@ -68,7 +69,8 @@ export function ProgressIndicator({
   currentStep,
   steps = DEFAULT_ANALYSIS_STEPS,
   className,
-  showDetailedView = true
+  showDetailedView = true,
+  onStepClick
 }: ProgressIndicatorProps) {
   // Calculate progress
   const currentStepIndex = steps.findIndex(step => step.id === currentStep);
@@ -178,6 +180,7 @@ export function ProgressIndicator({
           {steps.map((step, index) => {
             const status = getStepStatus(index);
             const isActive = status === 'processing';
+            const isClickable = status === 'completed' && onStepClick;
 
             return (
               <motion.div
@@ -188,12 +191,14 @@ export function ProgressIndicator({
                   scale: isActive ? 1.02 : 1
                 }}
                 transition={{ duration: 0.3 }}
+                onClick={() => isClickable && onStepClick(step.id)}
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-lg border transition-all duration-300",
                   {
                     "bg-green-50 border-green-200 dark:bg-green-950 dark:border-green-800": status === 'completed',
                     "bg-blue-50 border-blue-200 dark:bg-blue-950 dark:border-blue-800 shadow-sm": status === 'processing',
-                    "bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700": status === 'pending'
+                    "bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700": status === 'pending',
+                    "cursor-pointer hover:shadow-md hover:scale-[1.01] active:scale-[0.99]": isClickable
                   }
                 )}
               >

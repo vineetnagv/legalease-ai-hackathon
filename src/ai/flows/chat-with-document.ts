@@ -1,4 +1,3 @@
-'use server';
 /**
  * @fileOverview A Genkit flow for conversational AI chat about legal documents with full context awareness.
  */

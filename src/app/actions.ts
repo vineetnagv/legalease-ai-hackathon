@@ -9,6 +9,11 @@ import { generateFaq, type GenerateFaqInput, type GenerateFaqOutput } from '@/ai
 import { detectDocumentType } from '@/ai/flows/detect-document-type';
 import { chatWithDocument, type ChatWithDocumentInput, type ChatWithDocumentOutput } from '@/ai/flows/chat-with-document';
 import { detectMissingClauses, type DetectMissingClausesInput, type DetectMissingClausesOutput } from '@/ai/flows/detect-missing-clauses';
+import { summarizeDocument, type SummarizeDocumentInput, type SummarizeDocumentOutput } from '@/ai/flows/summarize-document';
+import { generateGlossary, type GenerateGlossaryInput, type GenerateGlossaryOutput } from '@/ai/flows/generate-glossary';
+import { redraftDocument, type RedraftDocumentInput, type RedraftDocumentOutput } from '@/ai/flows/redraft-document';
+import { generateDocument, type GenerateDocumentInput, type GenerateDocumentOutput } from '@/ai/flows/generate-document';
+
 import { type DetectDocumentTypeOutput, type DocumentType } from '@/types/document-types';
 import { type ChatMessage, type DocumentContext, type SuggestedQuestion } from '@/types/chat-types';
 import { SuggestedQuestionsService } from '@/lib/suggested-questions';
@@ -213,5 +218,81 @@ export async function detectMissingClausesInDocument(
   }
 
   const result = await detectMissingClauses({ documentText, userRole, documentType });
+  return result;
+}
+
+/**
+ * Calls an AI model to summarize a legal document.
+ * @param documentText The text content of the legal document.
+ * @returns A promise that resolves to the summary of the document.
+ * @throws An error if the document text is empty.
+ */
+export async function summarize(documentText: string): Promise<SummarizeDocumentOutput> {
+  if (!documentText) {
+    throw new Error('Document text is required to summarize.');
+  }
+
+  const result = await summarizeDocument({ documentText });
+  return result;
+}
+
+/**
+ * Calls an AI model to generate a glossary of key terms from a legal document.
+ * @param documentText The text content of the legal document.
+ * @returns A promise that resolves to the glossary of the document.
+ * @throws An error if the document text is empty.
+ */
+export async function glossary(documentText: string): Promise<GenerateGlossaryOutput> {
+  if (!documentText) {
+    throw new Error('Document text is required to generate a glossary.');
+  }
+
+  const result = await generateGlossary({ documentText });
+  return result;
+}
+
+/**
+ * Calls an AI model to redraft a legal document with improvements.
+ * @param documentText The text content of the original legal document.
+ * @param riskAnalysis The risk analysis of the document.
+ * @param missingClauses The missing clauses analysis of the document.
+ * @returns A promise that resolves to the redrafted document and a summary of changes.
+ * @throws An error if the document text is empty.
+ */
+export async function redraft(
+  documentText: string,
+  riskAnalysis?: AssessDocumentRiskOutput,
+  missingClauses?: DetectMissingClausesOutput
+): Promise<RedraftDocumentOutput> {
+  if (!documentText) {
+    throw new Error('Document text is required to redraft.');
+  }
+
+  const result = await redraftDocument({ documentText, riskAnalysis, missingClauses });
+  return result;
+}
+
+/**
+ * Calls an AI model to generate a legal document.
+ * Supports template-based, custom, and context-aware generation.
+ * @param input The input configuration for document generation.
+ * @returns A promise that resolves to the generated document with metadata.
+ * @throws An error if the input is invalid.
+ */
+export async function generate(input: GenerateDocumentInput): Promise<GenerateDocumentOutput> {
+  // Validate input based on mode
+  if (input.mode === 'template' && !input.templateType) {
+    throw new Error('Template type is required for template mode.');
+  }
+
+  if (input.mode === 'custom' && !input.customPrompt) {
+    throw new Error('Custom prompt is required for custom mode.');
+  }
+
+  if (input.mode === 'contextual' && !input.contextDocument) {
+    throw new Error('Context document is required for contextual mode.');
+  }
+
+  const result = await generateDocument(input);
   return result;
 }

@@ -1,4 +1,3 @@
-'use server';
 /**
  * @fileOverview A Genkit flow for suggesting a user's role in a legal document.
  */
@@ -51,6 +50,20 @@ ${documentText}
 
     } catch (error) {
       console.error('Error in suggestUserRole flow:', error);
+
+      // Log detailed error information for debugging
+      if (error instanceof Error) {
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
+
+      // Check for common API key issues
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      if (errorMessage.includes('API key') || errorMessage.includes('authentication') || errorMessage.includes('401')) {
+        console.error('⚠️ LIKELY API KEY ISSUE: Check that GEMINI_API_KEY is properly set in Firebase secrets');
+      }
+
       return '';
     }
   }

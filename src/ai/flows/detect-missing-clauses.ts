@@ -1,4 +1,3 @@
-'use server';
 /**
  * @fileOverview A Genkit flow for detecting important clauses missing from legal documents.
  */
@@ -15,7 +14,7 @@ const DetectMissingClausesInputSchema = z.object({
 });
 
 // Define the output schema
-const DetectMissingClausesOutputSchema = z.object({
+export const DetectMissingClausesOutputSchema = z.object({
   missingClauses: z.array(z.object({
     clauseTitle: z.string().describe('Title of the missing clause'),
     importance: z.enum(['Critical', 'Important', 'Recommended']).describe('How important this missing clause is'),
