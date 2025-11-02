@@ -9,6 +9,7 @@ import { generateFaq, type GenerateFaqInput, type GenerateFaqOutput } from '@/ai
 import { detectDocumentType } from '@/ai/flows/detect-document-type';
 import { chatWithDocument, type ChatWithDocumentInput, type ChatWithDocumentOutput } from '@/ai/flows/chat-with-document';
 import { detectMissingClauses, type DetectMissingClausesInput, type DetectMissingClausesOutput } from '@/ai/flows/detect-missing-clauses';
+import { generalChatbot, type GeneralChatbotInput, type GeneralChatbotOutput } from '@/ai/flows/general-chatbot';
 import { type DetectDocumentTypeOutput, type DocumentType } from '@/types/document-types';
 import { type ChatMessage, type DocumentContext, type SuggestedQuestion } from '@/types/chat-types';
 import { SuggestedQuestionsService } from '@/lib/suggested-questions';
@@ -213,5 +214,35 @@ export async function detectMissingClausesInDocument(
   }
 
   const result = await detectMissingClauses({ documentText, userRole, documentType });
+  return result;
+}
+
+/**
+ * Sends a message to the general website chatbot.
+ * @param message The user's message.
+ * @param language The user's preferred language.
+ * @param conversationHistory Array of previous messages in the conversation.
+ * @returns A promise that resolves to the AI response with suggested follow-ups.
+ * @throws An error if required parameters are missing.
+ */
+export async function sendGeneralChatMessage(
+  message: string,
+  language: string,
+  conversationHistory: ChatMessage[] = []
+): Promise<GeneralChatbotOutput> {
+  if (!message || message.trim() === '') {
+    throw new Error('Message is required to send a chat message.');
+  }
+
+  if (!language) {
+    throw new Error('Language is required for chat functionality.');
+  }
+
+  const result = await generalChatbot({
+    message: message.trim(),
+    language,
+    conversationHistory
+  });
+
   return result;
 }

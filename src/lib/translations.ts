@@ -110,7 +110,24 @@ const translations = {
     'font_large': 'Large',
     // Header
     'back_to_app': 'Back to App',
-    'logout': 'Logout'
+    'logout': 'Logout',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI Assistant',
+    'general_chatbot_description': 'Ask me anything about LegalEase AI, legal documents, or how to use our platform.',
+    'general_chatbot_placeholder': 'Ask me anything about LegalEase AI...',
+    'general_chatbot_send': 'Send',
+    'general_chatbot_thinking': 'AI is thinking...',
+    'general_chatbot_error': 'Sorry, I encountered an error. Please try again.',
+    'general_chatbot_suggested_questions': 'Suggested Questions:',
+    'general_chatbot_clear_chat': 'Clear Chat',
+    'general_chatbot_minimize': 'Minimize',
+    'general_chatbot_expand': 'Expand',
+    'general_chatbot_welcome': 'Hello! I\'m your LegalEase AI assistant. How can I help you today?',
+    'general_chatbot_help_upload': 'How do I upload a document?',
+    'general_chatbot_help_analysis': 'What does the risk assessment mean?',
+    'general_chatbot_help_features': 'What features does LegalEase AI offer?',
+    'general_chatbot_help_support': 'How can I get support?'
   },
   hi: {
     'legal_document_analysis': 'कानूनी दस्तावेज़ विश्लेषण',
@@ -208,7 +225,24 @@ const translations = {
     'font_default': 'डिफ़ॉल्ट',
     'font_large': 'बड़ा',
     'back_to_app': 'ऐप पर वापस जाएं',
-    'logout': 'लॉगआउट'
+    'logout': 'लॉगआउट',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI सहायक',
+    'general_chatbot_description': 'LegalEase AI, कानूनी दस्तावेजों, या हमारे प्लेटफॉर्म के उपयोग के बारे में कुछ भी पूछें।',
+    'general_chatbot_placeholder': 'LegalEase AI के बारे में कुछ भी पूछें...',
+    'general_chatbot_send': 'भेजें',
+    'general_chatbot_thinking': 'AI सोच रहा है...',
+    'general_chatbot_error': 'क्षमा करें, मुझे एक त्रुटि का सामना करना पड़ा। कृपया पुनः प्रयास करें।',
+    'general_chatbot_suggested_questions': 'सुझाए गए प्रश्न:',
+    'general_chatbot_clear_chat': 'चैट साफ़ करें',
+    'general_chatbot_minimize': 'छोटा करें',
+    'general_chatbot_expand': 'बढ़ाएं',
+    'general_chatbot_welcome': 'नमस्ते! मैं आपका LegalEase AI सहायक हूं। आज मैं आपकी कैसे मदद कर सकता हूं?',
+    'general_chatbot_help_upload': 'मैं दस्तावेज़ कैसे अपलोड करूं?',
+    'general_chatbot_help_analysis': 'जोखिम मूल्यांकन का क्या मतलब है?',
+    'general_chatbot_help_features': 'LegalEase AI कौन से फीचर प्रदान करता है?',
+    'general_chatbot_help_support': 'मुझे सहायता कैसे मिल सकती है?'
   },
   ta: {
     'legal_document_analysis': 'சட்ட ஆவணப் பகுப்பாய்வு',
@@ -306,7 +340,24 @@ const translations = {
     'font_default': 'இயல்புநிலை',
     'font_large': 'பெரியது',
     'back_to_app': 'பயன்பாட்டிற்குச் செல்லவும்',
-    'logout': 'வெளியேறு'
+    'logout': 'வெளியேறு',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI உதவியாளர்',
+    'general_chatbot_description': 'LegalEase AI, சட்ட ஆவணங்கள், அல்லது எங்கள் தளத்தைப் பயன்படுத்துவது பற்றி எதையும் கேளுங்கள்.',
+    'general_chatbot_placeholder': 'LegalEase AI பற்றி எதையும் கேளுங்கள்...',
+    'general_chatbot_send': 'அனுப்பு',
+    'general_chatbot_thinking': 'AI சிந்தித்துக்கொண்டிருக்கிறது...',
+    'general_chatbot_error': 'மன்னிக்கவும், நான் ஒரு பிழையை எதிர்கொண்டேன். தயவுசெய்து மீண்டும் முயற்சிக்கவும்.',
+    'general_chatbot_suggested_questions': 'பரிந்துரைக்கப்பட்ட கேள்விகள்:',
+    'general_chatbot_clear_chat': 'அரட்டையை அழிக்கவும்',
+    'general_chatbot_minimize': 'சுருக்கவும்',
+    'general_chatbot_expand': 'விரிவாக்கவும்',
+    'general_chatbot_welcome': 'வணக்கம்! நான் உங்கள் LegalEase AI உதவியாளர். இன்று உங்களுக்கு எவ்வாறு உதவ முடியும்?',
+    'general_chatbot_help_upload': 'ஆவணத்தை எவ்வாறு பதிவேற்றுவது?',
+    'general_chatbot_help_analysis': 'இடர் மதிப்பீட்டின் அர்த்தம் என்ன?',
+    'general_chatbot_help_features': 'LegalEase AI என்ன அம்சங்களை வழங்குகிறது?',
+    'general_chatbot_help_support': 'எவ்வாறு ஆதரவு பெற முடியும்?'
   },
   kn: {
     'legal_document_analysis': 'ಕಾನೂನು ದಾಖಲೆ ವಿಶ್ಲೇಷಣೆ',
@@ -404,7 +455,24 @@ const translations = {
     'font_default': 'ಡೀಫಾಲ್ಟ್',
     'font_large': 'ದೊಡ್ಡದು',
     'back_to_app': 'ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಹಿಂತಿರುಗಿ',
-    'logout': 'ಲಾಗ್‌ಔಟ್'
+    'logout': 'ಲಾಗ್‌ಔಟ್',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI ಸಹಾಯಕ',
+    'general_chatbot_description': 'LegalEase AI, ಕಾನೂನು ದಾಖಲೆಗಳು, ಅಥವಾ ನಮ್ಮ ವೇದಿಕೆಯನ್ನು ಬಳಸುವ ಬಗ್ಗೆ ಏನಾದರೂ ಕೇಳಿ.',
+    'general_chatbot_placeholder': 'LegalEase AI ಬಗ್ಗೆ ಏನಾದರೂ ಕೇಳಿ...',
+    'general_chatbot_send': 'ಕಳುಹಿಸಿ',
+    'general_chatbot_thinking': 'AI ಯೋಚಿಸುತ್ತಿದೆ...',
+    'general_chatbot_error': 'ಕ್ಷಮಿಸಿ, ನಾನು ದೋಷವನ್ನು ಎದುರಿಸಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.',
+    'general_chatbot_suggested_questions': 'ಸೂಚಿಸಿದ ಪ್ರಶ್ನೆಗಳು:',
+    'general_chatbot_clear_chat': 'ಚಾಟ್ ಅನ್ನು ತೆರವುಗೊಳಿಸಿ',
+    'general_chatbot_minimize': 'ಕಡಿಮೆ ಮಾಡಿ',
+    'general_chatbot_expand': 'ವಿಸ್ತರಿಸಿ',
+    'general_chatbot_welcome': 'ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ LegalEase AI ಸಹಾಯಕ. ಇಂದು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?',
+    'general_chatbot_help_upload': 'ದಾಖಲೆಯನ್ನು ಹೇಗೆ ಅಪ್‌ಲೋಡ್ ಮಾಡುವುದು?',
+    'general_chatbot_help_analysis': 'ಅಪಾಯ ಮೌಲ್ಯಮಾಪನದ ಅರ್ಥವೇನು?',
+    'general_chatbot_help_features': 'LegalEase AI ಯಾವ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ?',
+    'general_chatbot_help_support': 'ಹೇಗೆ ಬೆಂಬಲ ಪಡೆಯಬಹುದು?'
   },
   bn: {
     'legal_document_analysis': 'আইনি নথি বিশ্লেষণ',
@@ -502,7 +570,24 @@ const translations = {
     'font_default': 'ডিফল্ট',
     'font_large': 'বড়',
     'back_to_app': 'অ্যাপে ফিরে যান',
-    'logout': 'লগআউট'
+    'logout': 'লগআউট',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI সহায়ক',
+    'general_chatbot_description': 'LegalEase AI, আইনি নথি, বা আমাদের প্ল্যাটফর্ম ব্যবহার সম্পর্কে কিছু জিজ্ঞাসা করুন।',
+    'general_chatbot_placeholder': 'LegalEase AI সম্পর্কে কিছু জিজ্ঞাসা করুন...',
+    'general_chatbot_send': 'প্রেরণ করুন',
+    'general_chatbot_thinking': 'AI ভাবছে...',
+    'general_chatbot_error': 'দুঃখিত, আমি একটি ত্রুটি সম্মুখীন হয়েছি। অনুগ্রহ করে আবার চেষ্টা করুন।',
+    'general_chatbot_suggested_questions': 'প্রস্তাবিত প্রশ্ন:',
+    'general_chatbot_clear_chat': 'চ্যাট সাফ করুন',
+    'general_chatbot_minimize': 'ছোট করুন',
+    'general_chatbot_expand': 'বড় করুন',
+    'general_chatbot_welcome': 'হ্যালো! আমি আপনার LegalEase AI সহায়ক। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?',
+    'general_chatbot_help_upload': 'নথি কীভাবে আপলোড করব?',
+    'general_chatbot_help_analysis': 'ঝুঁকি মূল্যায়নের অর্থ কী?',
+    'general_chatbot_help_features': 'LegalEase AI কী বৈশিষ্ট্য প্রদান করে?',
+    'general_chatbot_help_support': 'কীভাবে সহায়তা পেতে পারি?'
   },
   mr: {
     'legal_document_analysis': 'कायदेशीर दस्तऐवज विश्लेषण',
@@ -600,7 +685,24 @@ const translations = {
     'font_default': 'डीफॉल्ट',
     'font_large': 'मोठा',
     'back_to_app': 'अ‍ॅपवर परत जा',
-    'logout': 'लॉगआउट'
+    'logout': 'लॉगआउट',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI सहायक',
+    'general_chatbot_description': 'LegalEase AI, कायदेशीर दस्तऐवज, किंवा आमच्या प्लॅटफॉर्म वापरण्याबद्दल काहीही विचारा.',
+    'general_chatbot_placeholder': 'LegalEase AI बद्दल काहीही विचारा...',
+    'general_chatbot_send': 'पाठवा',
+    'general_chatbot_thinking': 'AI विचार करत आहे...',
+    'general_chatbot_error': 'माफ करा, मला एक त्रुटी आली. कृपया पुन्हा प्रयत्न करा.',
+    'general_chatbot_suggested_questions': 'सूचविलेले प्रश्न:',
+    'general_chatbot_clear_chat': 'चॅट साफ करा',
+    'general_chatbot_minimize': 'लहान करा',
+    'general_chatbot_expand': 'मोठे करा',
+    'general_chatbot_welcome': 'नमस्कार! मी तुमचा LegalEase AI सहायक आहे. आज मी तुम्हाला कशी मदत करू शकतो?',
+    'general_chatbot_help_upload': 'दस्तऐवज कसे अपलोड करावे?',
+    'general_chatbot_help_analysis': 'धोका मूल्यांकनाचा अर्थ काय?',
+    'general_chatbot_help_features': 'LegalEase AI कोणती वैशिष्ट्ये प्रदान करते?',
+    'general_chatbot_help_support': 'मदत कशी मिळवावी?'
   },
   gu: {
     'legal_document_analysis': 'કાનૂની દસ્તાવેજ વિશ્લેષણ',
@@ -698,7 +800,24 @@ const translations = {
     'font_default': 'ડિફૉલ્ટ',
     'font_large': 'મોટું',
     'back_to_app': 'એપ પર પાછા જાઓ',
-    'logout': 'લોગઆઉટ'
+    'logout': 'લોગઆઉટ',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI સહાયક',
+    'general_chatbot_description': 'LegalEase AI, કાનૂની દસ્તાવેજો, અથવા અમારા પ્લેટફોર્મનો ઉપયોગ કરવા વિશે કંઈપણ પૂછો.',
+    'general_chatbot_placeholder': 'LegalEase AI વિશે કંઈપણ પૂછો...',
+    'general_chatbot_send': 'મોકલો',
+    'general_chatbot_thinking': 'AI વિચારી રહ્યું છે...',
+    'general_chatbot_error': 'માફ કરશો, મને એક ભૂલ આવી. કૃપા કરીને ફરી પ્રયાસ કરો.',
+    'general_chatbot_suggested_questions': 'સૂચવેલા પ્રશ્નો:',
+    'general_chatbot_clear_chat': 'ચેટ સાફ કરો',
+    'general_chatbot_minimize': 'છોટું કરો',
+    'general_chatbot_expand': 'મોટું કરો',
+    'general_chatbot_welcome': 'હેલો! હું તમારો LegalEase AI સહાયક છું. આજે હું તમને કેવી રીતે મદદ કરી શકું?',
+    'general_chatbot_help_upload': 'દસ્તાવેજ કેવી રીતે અપલોડ કરવો?',
+    'general_chatbot_help_analysis': 'જોખમ મૂલ્યાંકનનો અર્થ શું છે?',
+    'general_chatbot_help_features': 'LegalEase AI કયા લક્ષણો પ્રદાન કરે છે?',
+    'general_chatbot_help_support': 'મદદ કેવી રીતે મળી શકે?'
   },
   ml: {
     'legal_document_analysis': 'നിയമപരമായ പ്രമാണ വിശകലനം',
@@ -796,7 +915,24 @@ const translations = {
     'font_default': 'ഡിഫോൾട്ട്',
     'font_large': 'വലുത്',
     'back_to_app': 'ആപ്പിലേക്ക് മടങ്ങുക',
-    'logout': 'ലോഗ് ഔട്ട്'
+    'logout': 'ലോഗ് ഔട്ട്',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI സഹായി',
+    'general_chatbot_description': 'LegalEase AI, നിയമപരമായ പ്രമാണങ്ങൾ, അല്ലെങ്കിൽ ഞങ്ങളുടെ പ്ലാറ്റ്ഫോം ഉപയോഗിക്കുന്നതിനെക്കുറിച്ച് എന്തും ചോദിക്കുക.',
+    'general_chatbot_placeholder': 'LegalEase AI-നെക്കുറിച്ച് എന്തും ചോദിക്കുക...',
+    'general_chatbot_send': 'അയയ്ക്കുക',
+    'general_chatbot_thinking': 'AI ചിന്തിക്കുന്നു...',
+    'general_chatbot_error': 'ക്ഷമിക്കണം, എനിക്ക് ഒരു പിശക് നേരിട്ടു. ദയവായി വീണ്ടും ശ്രമിക്കുക.',
+    'general_chatbot_suggested_questions': 'നിർദ്ദേശിച്ച ചോദ്യങ്ങൾ:',
+    'general_chatbot_clear_chat': 'ചാറ്റ് മായ്ക്കുക',
+    'general_chatbot_minimize': 'ചുരുക്കുക',
+    'general_chatbot_expand': 'വികസിപ്പിക്കുക',
+    'general_chatbot_welcome': 'ഹലോ! ഞാൻ നിങ്ങളുടെ LegalEase AI സഹായിയാണ്. ഇന്ന് ഞാൻ നിങ്ങളെ എങ്ങനെ സഹായിക്കാം?',
+    'general_chatbot_help_upload': 'പ്രമാണം എങ്ങനെ അപ്‌ലോഡ് ചെയ്യാം?',
+    'general_chatbot_help_analysis': 'റിസ്ക് അസസ്മെന്റിന്റെ അർത്ഥം എന്താണ്?',
+    'general_chatbot_help_features': 'LegalEase AI എന്ത് സവിശേഷതകൾ നൽകുന്നു?',
+    'general_chatbot_help_support': 'എങ്ങനെ പിന്തുണ നേടാം?'
   },
   te: {
     'legal_document_analysis': 'చట్టపరమైన పత్ర విశ్లేషణ',
@@ -894,7 +1030,24 @@ const translations = {
     'font_default': 'డిఫాల్ట్',
     'font_large': 'పెద్దది',
     'back_to_app': 'యాప్‌కి తిరిగి వెళ్లండి',
-    'logout': 'లాగ్ అవుట్'
+    'logout': 'లాగ్ అవుట్',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI సహాయకుడు',
+    'general_chatbot_description': 'LegalEase AI, చట్టపరమైన పత్రాలు, లేదా మా ప్లాట్‌ఫారమ్‌ను ఉపయోగించడం గురించి ఏదైనా అడగండి.',
+    'general_chatbot_placeholder': 'LegalEase AI గురించి ఏదైనా అడగండి...',
+    'general_chatbot_send': 'పంపండి',
+    'general_chatbot_thinking': 'AI ఆలోచిస్తోంది...',
+    'general_chatbot_error': 'క్షమించండి, నేను ఒక లోపాన్ని ఎదుర్కొన్నాను. దయచేసి మళ్లీ ప్రయత్నించండి.',
+    'general_chatbot_suggested_questions': 'సూచించిన ప్రశ్నలు:',
+    'general_chatbot_clear_chat': 'చాట్‌ను క్లియర్ చేయండి',
+    'general_chatbot_minimize': 'చిన్నది చేయండి',
+    'general_chatbot_expand': 'విస్తరించండి',
+    'general_chatbot_welcome': 'హలో! నేను మీ LegalEase AI సహాయకుడిని. ఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?',
+    'general_chatbot_help_upload': 'పత్రాన్ని ఎలా అప్‌లోడ్ చేయాలి?',
+    'general_chatbot_help_analysis': 'రిస్క్ అసెస్‌మెంట్‌కు అర్థం ఏమిటి?',
+    'general_chatbot_help_features': 'LegalEase AI ఏ లక్షణాలను అందిస్తుంది?',
+    'general_chatbot_help_support': 'ఎలా మద్దతు పొందగలను?'
   },
   ur: {
     'legal_document_analysis': 'قانونی دستاویز کا تجزیہ',
@@ -992,7 +1145,24 @@ const translations = {
     'font_default': 'پہلے سے طے شدہ',
     'font_large': 'بڑا',
     'back_to_app': 'ایپ پر واپس جائیں',
-    'logout': 'لاگ آؤٹ'
+    'logout': 'لاگ آؤٹ',
+    
+    // General Chatbot
+    'general_chatbot_title': 'LegalEase AI اسسٹنٹ',
+    'general_chatbot_description': 'LegalEase AI، قانونی دستاویزات، یا ہمارے پلیٹ فارم استعمال کرنے کے بارے میں کچھ بھی پوچھیں۔',
+    'general_chatbot_placeholder': 'LegalEase AI کے بارے میں کچھ بھی پوچھیں...',
+    'general_chatbot_send': 'بھیجیں',
+    'general_chatbot_thinking': 'AI سوچ رہا ہے...',
+    'general_chatbot_error': 'معذرت، مجھے ایک خرابی کا سامنا ہوا۔ براہ کرم دوبارہ کوشش کریں۔',
+    'general_chatbot_suggested_questions': 'تجویز کردہ سوالات:',
+    'general_chatbot_clear_chat': 'چیٹ صاف کریں',
+    'general_chatbot_minimize': 'چھوٹا کریں',
+    'general_chatbot_expand': 'بڑا کریں',
+    'general_chatbot_welcome': 'ہیلو! میں آپ کا LegalEase AI اسسٹنٹ ہوں۔ آج میں آپ کی کس طرح مدد کر سکتا ہوں؟',
+    'general_chatbot_help_upload': 'دستاویز کیسے اپ لوڈ کریں؟',
+    'general_chatbot_help_analysis': 'رسک اسسمنٹ کا مطلب کیا ہے؟',
+    'general_chatbot_help_features': 'LegalEase AI کیا خصوصیات فراہم کرتا ہے؟',
+    'general_chatbot_help_support': 'کس طرح سپورٹ حاصل کر سکتے ہیں؟'
   }
 };
 

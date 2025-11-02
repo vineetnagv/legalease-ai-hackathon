@@ -62,6 +62,7 @@ import { useTranslation } from '@/lib/translations';
 import { ProgressIndicator } from '@/components/ui/progress-indicator';
 import ErrorBoundary from '@/components/error-boundary';
 import { EnhancedLoading, FileUploadLoading } from '@/components/ui/enhanced-loading';
+import { GeneralChatbot } from '@/components/general-chatbot';
 
 type Status =
   | 'idle'
@@ -1347,6 +1348,9 @@ export default function Dashboard() {
           currentDocument={documentContext}
         />
       )}
+
+      {/* General Chatbot */}
+      <GeneralChatbot />
       </div>
     </ErrorBoundary>
   );
